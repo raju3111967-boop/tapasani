@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <title>पुर्ण रक्कम टिप्पणी - {{ memo.deed_number }}</title>
+    <style>
+        @page {
+            size: legal;
+            margin: 10mm 10mm 10mm 15mm;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Noto Sans Devanagari', 'Mangal', Arial, sans-serif;
+            font-size: 12pt;
+            line-height: 1.35;
+            color: #000;
+            background: #fff;
+            max-width: 215.9mm;
+            margin: 0 auto;
+            padding: 5px 15px;
+        }
+        .report-header {
+            text-align: center;
+            margin-bottom: 0;
+            position: relative;
+        }
+        .office-name {
+            font-size: 16pt;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+        .office-address {
+            font-size: 13pt;
+            margin-bottom: 5px;
+        }
+        .header-contact {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12pt;
+            margin-bottom: 2px;
+            padding: 0 5px;
+        }
+        .header-line {
+            border-top: 2px solid #000;
+            margin: 2px 0 15px 0;
+            width: 100%;
+        }
+        .top-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: normal;
+        }
+        .subject-section {
+            text-align: center;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .reference-section {
+            text-align: left;
+            margin-bottom: 10px;
+        }
+        .submission {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+        .main-body {
+            text-align: justify;
+            margin-bottom: 20px;
+        }
+        p { margin-bottom: 5px; }
+        .p-indent { text-indent: 50px; }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        .data-table th, .data-table td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center;
+        }
+        .data-table th { font-weight: bold; }
+
+        .signature-footer {
+            margin-top: 40px;
+            page-break-inside: avoid;
+        }
+        .sig-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        .sig-col {
+            width: 30%;
+        }
+        .final-signature {
+            text-align: right;
+            margin-top: 10px;
+        }
+        .sig-space {
+            height: 40px;
+        }
+
+        .print-buttons {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 999;
+        }
+        .btn-print, .btn-preview {
+            background: #0d6efd;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        @media print {
+            .print-buttons { display: none !important; }
+            #previewOverlay { display: none !important; }
+            body { padding: 0; margin: 0; }
+        }
+        #previewOverlay {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        #previewBox {
+            background: #fff;
+            max-width: 850px;
+            margin: 40px auto;
+            padding: 50px;
+            border-radius: 8px;
+            position: relative;
+        }
+        #closePreview {
+            position: absolute; top: 15px; right: 20px;
+            background: #dc3545; color: #fff;
+            border: none; border-radius: 5px;
+            padding: 5px 15px; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="print-buttons">
+        <button class="btn-preview" onclick="showPreview()">Print Preview</button>
+        <button class="btn-print" onclick="window.print()">Print</button>
+    </div>
+
+    <!-- Header -->
+    <div class="report-header">
+        <div class="office-name">सह दुय्यम निबंधक त्रंबकेश्वर</div>
+        <div class="office-address">{{ office.office_address }}</div>
+        <div class="header-contact">
+            <span>फोन नंबर : {{ office.office_phone }}</span>
+            <span style="text-align: right;">ई-मेल : {{ office.office_email }}</span>
+        </div>
+        <div class="header-line"></div>
+    </div>
+
+    <!-- Top Section -->
+    <div class="top-meta">
+        <div>कार्यालयीन र्टिप्पणी</div>
+        <div>दिनांक :- {{ today|date:"d/m/Y" }}</div>
+    </div>
+
+    <!-- Subject -->
+    <div class="subject-section">
+        विषय :- {{ memo.get_inspection_type_display }} सन {{ memo.inspection_year }} मधील परिच्छेद क्र {{ memo.paragraph_number }} दस्त क्र {{ memo.deed_number }} वसुली बाबत
+    </div>
+
+    <!-- Reference -->
+    <div class="reference-section">
+        संदर्भ :- {{ memo.executant_name }} यांचा विनंती अर्ज
+    </div>
+
+    <!-- Submission -->
+    <div class="submission">
+        मा. {{ office.designation_02 }} यांचेकडे सविनय सादर
+    </div>
+
+    <!-- Main Body -->
+    <div class="main-body">
+        <p class="p-indent">
+            {{ memo.executant_name }} यांनी अर्जान्वये विषयाकिंत दस्तऐवजात मुद्रांक शुल्क , नोंदणी फी व शास्ती शासन जमा करुन तसे ई-चलन या कार्यालया सादर केलेले आहे. अर्जदार यांनी सह दुय्यम निबंधक त्रंबकेश्वर या कार्यालयाची सन {{ memo.inspection_year }} मधील दि. {{ memo.registration_date|date:"d.m.Y" }} चा दस्तऐवज क्रं. {{ memo.deed_number }} मधील कमी पडलेला मुद्रांक शुल्क रुपये {{ memo.recovered_stamp_duty|floatformat:2 }} व कमी पडलेली नोंदणी फी रुपये {{ memo.recovered_reg_fee|floatformat:2 }} व शास्ती रुपये {{ memo.recovered_penalty|floatformat:2 }} {{ memo.executant_name }} यांनी ग्रास प्रणालीमध्ये खालील प्रमाणे शासन जमी केलेली आहे.
+        </p>
+        
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>दस्त क्र</th>
+                    <th>तपशिल</th>
+                    <th>रक्कम</th>
+                    <th>जमा केल्याचा दि.</th>
+                    <th>डिफेस क्र</th>
+                    <th>डिफेस दिनांक</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td rowspan="3">{{ memo.deed_number }}</td>
+                    <td>मुद्रांक शुल्क</td>
+                    <td>{{ memo.recovered_stamp_duty|floatformat:2 }}</td>
+                    <td>{{ memo.recovered_stamp_duty_date|date:"d.m.Y" }}</td>
+                    <td>{{ memo.recovered_stamp_duty_challan|default:"-" }}</td>
+                    <td>{{ memo.recovered_stamp_duty_date|date:"d.m.Y" }}</td>
+                </tr>
+                <tr>
+                    <td>नोंदणी फी</td>
+                    <td>{{ memo.recovered_reg_fee|floatformat:2 }}</td>
+                    <td>{{ memo.recovered_reg_fee_date|date:"d.m.Y" }}</td>
+                    <td>{{ memo.recovered_reg_fee_challan|default:"-" }}</td>
+                    <td>{{ memo.recovered_reg_fee_date|date:"d.m.Y" }}</td>
+                </tr>
+                <tr>
+                    <td>शास्ती</td>
+                    <td>{{ memo.recovered_penalty|floatformat:2 }}</td>
+                    <td>{{ memo.recovered_penalty_date|date:"d.m.Y" }}</td>
+                    <td>{{ memo.recovered_penalty_challan|default:"-" }}</td>
+                    <td>{{ memo.recovered_penalty_date|date:"d.m.Y" }}</td>
+                </tr>
+                <tr style="font-weight: bold;">
+                    <td colspan="2">एकुण</td>
+                    <td>{{ memo.recovered_amount|floatformat:2 }}</td>
+                    <td colspan="3"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>
+            प्रमाणे अक्षरी एकुण रुपये {{ amount_in_words }}
+        </p>
+
+        <p class="p-indent">
+            सह दुय्यम निबंधक त्रंबकेश्वर या कार्यालयाची तपासणी सन {{ memo.inspection_year }} मधील दस्त क्रं. {{ memo.deed_number }} ( निष्पादन दि. {{ memo.registration_date|date:"d.m.Y" }} मधील कमी पडलेला मुद्रांक शुल्क रुपये {{ memo.recovered_stamp_duty|floatformat:2 }} व कमी पडलेली नोंदणी फी रुपये {{ memo.recovered_reg_fee|floatformat:2 }} व शास्ती रुपये {{ memo.recovered_penalty|floatformat:2 }} अशी एकुण रुपये {{ memo.recovered_amount|floatformat:2 }} ग्रास प्रणालीमध्ये शासन जमी केलेली आहे.
+        </p>
+
+        <p class="p-indent">
+            उपरोक्त आषयाच्या अनुषगांने प्रस्तावित करण्यात येते की, विषयाकिंत दस्त क्रं. {{ memo.deed_number }} ( निष्पादन दि. {{ memo.registration_date|date:"d.m.Y" }} मधील कमी पडलेला मुद्रांक शुल्क रुपये {{ memo.recovered_stamp_duty|floatformat:2 }} व कमी पडलेली नोंदणी फी रुपये {{ memo.recovered_reg_fee|floatformat:2 }} व शास्ती रुपये {{ memo.recovered_penalty|floatformat:2 }} अशी एकुण रुपये {{ memo.recovered_amount|floatformat:2 }} शासन जमा केलेली असल्याने सदरचा विषयाकिंत परिच्छेद ({{ memo.paragraph_number }}) करण्यात यावा व (सह दुय्यम निबंधक त्रंबकेश्वर) यांना त्यांचे अभिलेखत नोंद घेणेकामी सूचीत करण्यात यावे असे वाटते.
+        </p>
+
+        <p>
+            मान्य असल्यास सोबत जोडण्यात आलेल्या प्रारुप पत्रावर स्वाक्षरी होणेस विनंती आहे
+        </p>
+        <p style="text-align: center; font-weight: bold; margin-top: 10px;">
+            कृपया आदेशार्थ
+        </p>
+    </div>
+
+    <!-- Signature Footer -->
+    <div class="signature-footer">
+        <div class="sig-row">
+            <div class="sig-col">
+                <div class="sig-space"></div>
+                कनिष्ठ लिपीक
+            </div>
+            <div class="sig-col">
+                <div class="sig-space"></div>
+                वरिष्ठ लिपीक
+            </div>
+            <div class="sig-col">
+                <div class="sig-space"></div>
+                मुख्यालय सहाय्यक
+            </div>
+        </div>
+
+        <div class="final-signature">
+            <div class="sig-space"></div>
+            <div style="font-weight: bold;">({{ office.working_officer_name }})</div>
+            <div>{{ office.designation_02 }}</div>
+            <div>सह दुय्यम निबंधक त्रंबकेश्वर</div>
+        </div>
+    </div>
+
+    <!-- Preview Overlay -->
+    <div id="previewOverlay">
+        <div id="previewBox">
+            <button id="closePreview" onclick="hidePreview()">Close</button>
+            <div id="previewContent"></div>
+        </div>
+    </div>
+
+    <script>
+        function showPreview() {
+            const content = document.body.cloneNode(true);
+            content.querySelector('.print-buttons').remove();
+            document.getElementById('previewContent').innerHTML = content.innerHTML;
+            document.getElementById('previewOverlay').style.display = 'block';
+        }
+        function hidePreview() {
+            document.getElementById('previewOverlay').style.display = 'none';
+        }
+    </script>
+
+</body>
+</html>

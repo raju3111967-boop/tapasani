@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}कार्यालयाची माहिती - तपासणी मेमो{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <h2><i class="bi bi-building"></i> कार्यालयाची माहिती</h2>
+    <div class="d-flex gap-2">
+        <a href="{% url 'office_info_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> नवीन माहिती
+        </a>
+    </div>
+</div>
+
+<!-- Results Count -->
+<div class="mb-3 d-flex justify-content-between align-items-center">
+    <small class="text-muted">
+        <i class="bi bi-list-ul me-1"></i> एकूण {{ offices.count }} नोंदी
+    </small>
+</div>
+
+<!-- Table -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-container">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>अं.नं.</th>
+                        <th>कार्यालयाचे नांव</th>
+                        <th>जिल्हा</th>
+                        <th>विभाग</th>
+                        <th>ई-मेल</th>
+                        <th>फोन</th>
+                        <th>स्थिती</th>
+                        <th class="text-center">कृती</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for office in offices %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><strong>{{ office.office_name }}</strong></td>
+                        <td>{{ office.district|default:"-" }}</td>
+                        <td>{{ office.division_name|default:"-" }}</td>
+                        <td>{{ office.office_email|default:"-" }}</td>
+                        <td>{{ office.office_phone|default:"-" }}</td>
+                        <td>
+                            {% if office.is_active %}
+                            <span class="badge bg-success">सक्रिय</span>
+                            {% else %}
+                            <span class="badge bg-secondary">निष्क्रिय</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'office_info_edit' office.pk %}" class="btn btn-outline-warning" title="संपादन">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'office_info_toggle' office.pk %}" class="btn btn-outline-info" title="स्थिती बदल">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                </a>
+                                <a href="{% url 'office_info_delete' office.pk %}" class="btn btn-outline-danger" title="हटवा"
+                                   onclick="return confirm('तुम्हाला खात्री आहे की तुम्ही ही माहिती हटवू इच्छिता?');">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">
+                            <i class="bi bi-inbox" style="font-size:32px;"></i><br>
+                            कोणतीही माहिती आढळली नाही.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

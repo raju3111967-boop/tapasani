@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}नोटीस इतिहास - दस्त क्र. {{ memo.deed_number }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="bi bi-clock-history"></i> नोटीस इतिहास</h2>
+    <div class="d-flex gap-2">
+        <a href="{% url 'inspection_detail' memo.pk %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> मागे
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <strong>दस्त क्र. {{ memo.deed_number }}</strong>
+    </div>
+    <div class="card-body p-0">
+        {% if notices %}
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th>अं.नं.</th>
+                    <th>प्रकार</th>
+                    <th>पाठवलेली दिनांक</th>
+                    <th>जनरेट केले आहे</th>
+                    <th>Word फाइल</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for notice in notices %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        {% if notice.notice_type %}
+                        <span class="badge bg-info">{{ notice.get_notice_type_display }}</span>
+                        {% elif notice.letter_type %}
+                        <span class="badge bg-success">{{ notice.get_letter_type_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ notice.sent_date|date:"d/m/Y H:i" }}</td>
+                    <td>{{ notice.generated_by|default:"-" }}</td>
+                    <td>
+                        {% if notice.docx_file %}
+                        <a href="{{ notice.docx_file.url }}" class="btn btn-sm btn-outline-primary" download>
+                            <i class="bi bi-download"></i> डाउनलोड
+                        </a>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="text-center py-4 text-muted">
+            <i class="bi bi-inbox" style="font-size:32px;"></i><br>
+            कोणतीही नोटीस किंवा पत्र जनरेट केले नाहीत.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

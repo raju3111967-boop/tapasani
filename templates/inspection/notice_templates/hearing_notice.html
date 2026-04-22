@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <title>सुनावणी नोटीस – मुद्रांक शुल्य वसुलीची नोटीस</title>
+    <style>
+        @page { 
+            size: legal; 
+            margin: 10mm 12mm; 
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Noto Sans Devanagari', 'Mangal', Arial, sans-serif;
+            font-size: 13.5px;
+            line-height: 1.3;
+            color: #000;
+            background: #fff;
+            max-width: 215.9mm;
+            margin: 0 auto;
+            padding: 10px 25px;
+        }
+        .header-office-name {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+        .header-address {
+            text-align: center;
+            font-size: 13px;
+            margin-bottom: 2px;
+        }
+        .header-contact {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        .header-line {
+            border: none;
+            border-top: 3px solid #000;
+            margin: 5px 0 15px 0;
+        }
+        .notice-title {
+            text-align: center;
+            font-size: 15px;
+            font-weight: bold;
+            text-decoration: underline;
+            margin-bottom: 15px;
+        }
+        .body-wrap { text-align: justify; }
+        p { margin-bottom: 8px; text-align: justify; }
+        .p-indent { text-indent: 35px; }
+        .notice-content { margin-left: 60px; margin-right: 30px; }
+        
+        .ref-section {
+            margin-bottom: 15px;
+        }
+        .ref-row {
+            display: flex;
+            margin-bottom: 5px;
+        }
+        .ref-label {
+            min-width: 70px;
+            font-weight: bold;
+        }
+        .ref-content {
+            flex: 1;
+        }
+
+        .notice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 13px;
+        }
+        .notice-table th, .notice-table td {
+            border: 1px solid #000;
+            padding: 4px 10px;
+            text-align: center;
+        }
+        .notice-table thead th { font-weight: bold; background: #f9f9f9; }
+        
+        .signature-section { 
+            text-align: right; 
+            margin-top: 20px;
+            margin-right: 10mm;
+        }
+        .signature-name { font-weight: bold; }
+        
+        .print-buttons {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 999;
+        }
+        .btn-print, .btn-preview {
+            background: #0d6efd;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: inherit;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .btn-print:hover, .btn-preview:hover { background: #0b5ed7; }
+        
+        #previewOverlay {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        #previewBox {
+            background: #fff;
+            max-width: 850px;
+            margin: 40px auto;
+            padding: 40px;
+            border-radius: 8px;
+            position: relative;
+        }
+        #closePreview {
+            position: absolute; top: 15px; right: 20px;
+            background: #dc3545; color: #fff;
+            border: none; border-radius: 5px;
+            padding: 5px 15px; cursor: pointer; font-size: 16px;
+        }
+        @media print {
+            .print-buttons { display: none !important; }
+            #previewOverlay { display: none !important; }
+            body { 
+                padding: 0; 
+                margin-left: 5mm; 
+                margin-right: 5mm; 
+            }
+            @page { 
+                size: legal; 
+                margin-left: 5mm; 
+                margin-right: 5mm; 
+                margin-top: 10mm; 
+                margin-bottom: 10mm; 
+            }
+            .signature-section {
+                text-align: right;
+                margin-right: 20mm !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="print-buttons">
+    <button class="btn-preview" onclick="showPreview()">Print Preview</button>
+    <button class="btn-print" onclick="window.print()">Print</button>
+</div>
+
+<div class="header-office-name">सहजिल्हा निबंधक तथा मुद्रांक जिल्हाधिकारी</div>
+<div class="header-address">{{ office.office_address }}</div>
+<div class="header-contact">
+    <span>(फोन नं. {{ office.office_phone }})</span>
+    <span>(ई-मेल आयडी: {{ office.office_email }})</span>
+</div>
+<div class="header-line"></div>
+
+<div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: flex-start;">
+    <div>जा क्र. द.क्र. {{ memo.deed_number }} / तपासणी वर्ष {{ memo.inspection_year }} /</div>
+    <div style="text-align: right;">दिनांक :- {{ notice_date }}</div>
+</div>
+
+<div class="notice-title">मुद्रांक शुल्क वसुलीची सुनावणी नोटीस</div>
+
+<div class="notice-content">
+    <div class="body-wrap">
+       <p style="text-align: center;">विषय :- महाराष्ट्र मुद्रांक अधिनियम १९५८ अन्वये मुद्रांक शुल्य वसुली बाबत</p>    <p style="text-align: center; margin-right: 0px;">---------------------------------------------------------------------</p>
+       <p style="text-align: center; margin-left: 100px;"> संदर्भ :- 1. {{ memo.office_name }} यांचेकडील पत्र क्र {{ memo.get_inspection_type_display }}/{{ memo.inspection_year }} दि.{{ memo.memo_date|date:"d.m.Y" }}</p>
+       <p style="text-align: center; margin-right: 200px;">
+           2. या कार्यालयाची दिनांक {{ first_notice_date|default:"(प्रथम नोटीसीचा जनरेट दिनांक)" }} ची वसुलीची नोटीस
+       </p>
+       <p style="text-align: center; margin-right: 200px;">
+           3. इस कार्यालयाची दिनांक {{ second_notice_date|default:"(दुस-या नोटीसीचा जनरेट दिनांक)" }} ची वसुलीची नोटीस
+       </p>
+
+        <p class="p-indent">उपरोक्त विषयान्वये आपणास कळविण्यात येते की, विषयांकित तपासणीमध्ये आपण {{ memo.office_name }} या कार्यालयात नोंदविलेला {{ memo.document_type }} दस्तऐवज क्र. {{ memo.deed_number }} दिनांक {{ memo.registration_date|date:"d/m/Y" }}  रोजी नोंदविण्यात आलेला आहे.</p>
+
+        <p class="p-indent">प्रस्तुतच्या दस्तऐवजाची तपासणी केली असता असे निदर्शनास आले आहे की, आपण {{ memo.office_name }} या कार्यालयात नोंदविलेला {{ memo.document_type }} दस्तऐवज क्र. {{ memo.deed_number }} दिनांक {{ memo.registration_date|date:"d/m/Y" }} रोजी नोंदविण्यात आलेल्या दस्तऐवजातील मिळकत मौजे {{ memo.village }},तालुका {{ memo.taluka }}, येथील {{ memo.property_type }},असलेली मिळकत   {{ memo.group_survey }} ,{{ memo.survey_number|default:"-" }}, मधील क्षेत्र {{ memo.sold_area }} {{ memo.unit }} हस्तांतरीत केलेले आहे. त्याची बाजारमूल्य किंमत ₹ {{ memo.market_value|floatformat:2 }} अशी आहे तथापि आपण दस्तऐवजी मोबदला ₹ {{ memo.consideration_amount|floatformat:2 }} असा दर्शविलेला आहे.</p>
+
+        <p>उपरोक्त नुसार आपण दस्तऐवजास खालील प्रमाणे मुद्रांक शुल्क व नोंदणी फी कमी पडलेली आहे.</p>
+
+        <table class="notice-table">
+            <thead>
+                <tr>
+                    <th>अनुक्रमांक</th>
+                    <th>तपशिल</th>
+                    <th>मुद्रांक शुल्क</th>
+                    <th>नोंदणी फी</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>१</td>
+                    <td><strong>आवश्यक</strong></td>
+                    <td>₹{{ memo.stamp_duty_actual|floatformat:2 }}</td>
+                    <td>₹{{ memo.reg_fee_actual|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <td>२</td>
+                    <td><strong>भरलेला</strong></td>
+                    <td>₹{{ memo.stamp_duty_collected|floatformat:2 }}</td>
+                    <td>₹{{ memo.reg_fee_collected|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <td>३</td>
+                    <td><strong>कमी पडलेला</strong></td>
+                    <td>₹{{ memo.stamp_duty_short|floatformat:2 }}</td>
+                    <td>₹{{ memo.reg_fee_short|floatformat:2 }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>२/- तुम्ही वरील प्रमाणे मुद्रांक शुल्क कमी भरल्याने महाराष्ट्र मुद्रांक अधिनियम १९५८ चे कलम ३२ अन्वये ₹{{ memo.stamp_duty_short|floatformat:2 }} इतके मुद्रांक शुल्क आणि कमी पडलेली नोंदणी फी ₹{{ memo.reg_fee_short|floatformat:2 }} अशी एकूण ₹{{ memo.total_short|floatformat:2 }} (अक्षरी: {{ amount_in_words }}) सात दिवसांच्या आत या कार्यालयात जमा करावी अथवा आपले लेखी अभिवदेन पुराव्यासह या कार्यालयात सादर करावे.आपणास संदर्भ क्र 1 व संदर्भ  क्र.2 अन्वये आपणास कळविण्यात आले होते तथापी आपण कोणत्याही प्रकारे आपले म्हणणे मांडलेले नाही अथवा कोणत्याही प्रकारची रककम शासना जमा केलेली नाही </p>
+
+        <p>३/- महाराष्ट्र मुद्रांक अधिनियम १९५८ चे कलम ३९ अन्वये निष्पादानाच्या दिनांकापासून {{ memo.execution_date|date:"d/m/Y" }} कमी पडलेल्या मुद्रांक शुल्काच्या प्रतिमाह १% प्रमाणे किंवा जास्तीत जास्त कमी मुद्रांक शुल्काच्या चारपट यापैकी जी कमी असेल इतकी शास्ती आकारण्यात येईल याची नोंद घ्यावी.</p>
+
+        <p>४/- तथापी  आपणा परत एकदा संधी देण्यात येते की विषयाकिंत प्रकरणी आपले काही म्हणणे असल्यास आपण  दि. ---------------/----------/----------  रोजी  सकाळी ---------  वाजता आपण अथवा आपले  प्रतिनिधी मार्फत समक्ष पुराव्यासह म्हणणे मांडू शकता आपणास ही शेवटीची संधी देण्यात येत आहे.
+               सदर  सुनावणीच्या दिनाकांस आपण अथवा आपले प्रतिनिधी समक्ष हजर न झाल्यास आपले काहीही म्हणणे नाही असे समजुन महसुली वसुलीची कार्यवाही करण्यात येईल यांची नोंद घ्यावी 
+</p>
+    </div>
+
+    <div class="signature-section">
+        <div class="signature-name">{{ office.working_officer_name }}</div>
+        <div class="signature-designation">{{ office.designation_02 }}</div>
+    </div>
+
+    <div style="margin-top: 15px;">
+        <p><strong>प्रति,</strong></p>
+        <p>{{ memo.executant_name }}, {{ memo.executant_address|default:"-" }} यांना माहितीसाठी व कार्यवाहीसाठी.</p>
+        <p style="margin-top: 10px;"><strong>प्रत,</strong></p>
+        <p>२. {{ memo.office_name }} यांना माहीतीसाठी व पुढील कार्यवाहीसाठी</p>
+        <p>२/- सदरची नोटीस संबंधीतांना बजावुन दिनांकिंत पोहोच या कार्यालयास सादर करावी</p>
+    </div>
+</div>
+
+<div id="previewOverlay">
+    <div id="previewBox">
+        <button id="closePreview" onclick="hidePreview()">×</button>
+        <div id="previewContent"></div>
+    </div>
+</div>
+
+<script>
+function showPreview() {
+    const content = document.body.cloneNode(true);
+    content.querySelector('.print-buttons').remove();
+    document.getElementById('previewContent').innerHTML = content.innerHTML;
+    document.getElementById('previewOverlay').style.display = 'block';
+}
+
+function hidePreview() {
+    document.getElementById('previewOverlay').style.display = 'none';
+}
+</script>
+
+</body>
+</html>

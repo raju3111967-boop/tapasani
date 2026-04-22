@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}मास्टर डेटा - तपासणी मेमो{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="bi bi-database"></i> मास्टर डेटा व्यवस्थापन</h2>
+</div>
+
+<div class="row g-3">
+    {% for master in masters %}
+    <div class="col-md-3 col-6">
+        <a href="{% url 'master_list' master.slug %}" class="master-card">
+            <div class="master-icon">
+                <i class="bi {{ master.icon }}"></i>
+            </div>
+            <div class="master-title">{{ master.title }}</div>
+            <div class="master-count">{{ master.count }}</div>
+            <small class="text-muted">नोंदी</small>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <title>पुर्ण रक्कम पत्र - {{ memo.deed_number }}</title>
+    <style>
+        /* Base Styles */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        @page {
+            size: legal; /* 8.5" x 14" (approx 216mm x 356mm) */
+            margin: 6mm 10mm 6mm 15mm;
+        }
+
+        body {
+            font-family: 'Noto Sans Devanagari', 'Mangal', Arial, sans-serif;
+            font-size: 11.5pt;
+            line-height: 1.3;
+            color: #000;
+            background: #fff;
+            width: 215.9mm;
+            margin: 0 auto;
+            padding: 0;
+            overflow: hidden; /* Strict requirement: no 2nd page */
+        }
+
+        /* Container to force single page and spacing */
+        .printable-content {
+            width: 100%;
+            height: 330mm; /* printable height of legal approx */
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+        }
+
+        /* Buttons */
+        .no-print {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+        .btn-blue {
+            background-color: #0056b3;
+            color: #fff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+        .btn-blue:hover { background-color: #004494; transform: translateY(-1px); }
+
+        /* Header (Office info - center/center/right/left) */
+        .office-header {
+            text-align: center;
+            margin-bottom: 2px;
+        }
+        .office-name-row {
+            font-size: 17pt;
+            font-weight: bold;
+            margin-bottom: 2px;
+            letter-spacing: 0.5px;
+        }
+        .office-address-row {
+            font-size: 13pt;
+            margin-bottom: 4px;
+        }
+        .contact-row-head {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11.5pt;
+            width: 100%;
+            padding: 0 10px;
+        }
+        .bold-line-separator {
+            border-top: 2.5px solid #000;
+            margin-top: 2px;
+            margin-bottom: 12px;
+            width: 100%;
+        }
+
+        /* Letter Tracking */
+        .letter-tracking {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 11pt;
+            padding: 0 5px;
+        }
+
+        /* Alignments */
+        .left-align { text-align: left; }
+        .center-align { text-align: center; }
+        .justify-text { text-align: justify; }
+        
+        .section-margin { margin-bottom: 10px; }
+
+        .subject-container {
+            font-weight: bold;
+            text-align: center;
+            margin: 10px auto;
+            width: 90%;
+            line-height: 1.4;
+        }
+        
+        .reference-container {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+
+        /* Main Body */
+        .main-body {
+            text-align: justify;
+            flex-grow: 1; /* Allow it to take up space to push footer */
+        }
+        .p-indent {
+            text-indent: 60px;
+            margin-bottom: 8px;
+        }
+
+        /* Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 10.5pt;
+        }
+        .data-table th, .data-table td {
+            border: 1.5px solid #000;
+            padding: 5px 8px;
+            text-align: center;
+        }
+        .data-table th { font-weight: bold; background: #f9f9f9; }
+
+        /* Signature Section */
+        .signature-block {
+            margin-top: auto;
+            text-align: right;
+            padding-right: 20px;
+            margin-bottom: 30px;
+        }
+        .sig-name-wrap { font-weight: bold; margin-top: 40px; font-size: 12pt; }
+
+        /* Copy To Section */
+        .copy-to {
+            font-size: 10.5pt;
+            padding-top: 10px;
+            border-top: 1px dotted #ccc;
+            margin-bottom: 20px;
+        }
+
+        /* Preview Overlay */
+        #previewOverlay {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 2000; overflow-y: auto; padding: 20px;
+        }
+        .preview-document {
+            background: #fff; width: 215.9mm; min-height: 330.2mm; margin: 0 auto;
+            padding: 10mm 15mm; box-shadow: 0 10px 50px rgba(0,0,0,0.6); position: relative;
+        }
+        #closePreview {
+            position: absolute; top: 10px; right: 10px; background: #c0392b; color: #fff;
+            border: none; padding: 7px 16px; border-radius: 4px; cursor: pointer; font-weight: bold;
+        }
+
+        @media print {
+            .no-print, #previewOverlay { display: none !important; }
+            body { padding: 0; margin: 0; }
+            .printable-content { height: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Utility Buttons -->
+    <div class="no-print">
+        <button class="btn-blue" onclick="showPreview()">प्रिंट प्रिव्ह्यू</button>
+        <button class="btn-blue" onclick="window.print()">प्रिंट रिपोर्ट</button>
+    </div>
+
+    <!-- Letter Content -->
+    <div class="printable-content">
+        <!-- Office Letterhead -->
+        <div class="office-header">
+            <div class="office-name-row">{{ office.office_name }}</div>
+            <div class="office-address-row">{{ office.office_address }}</div>
+            <div class="contact-row-head">
+                <div>फोन नंबर : {{ office.office_phone }}</div>
+                <div style="text-align: right;">ई-मेल : {{ office.office_email }}</div>
+            </div>
+            <div class="bold-line-separator"></div>
+        </div>
+
+        <!-- Meta Line (Ref No & Date) -->
+        <div class="letter-tracking">
+            <div>क्र कक्ष-तपासणी/({{ memo.get_inspection_type_display }})/दस्त.क्र.({{ memo.deed_number }})/({{ memo.inspection_year }})/</div>
+            <div>दिनांक: {{ today|date:"d/m/Y" }}</div>
+        </div>
+
+        <!-- Recipient -->
+        <div class="left-align section-margin">
+            <strong>प्रति,</strong><br>
+            {{ memo.office_name }}
+        </div>
+
+        <!-- Subject & Reference -->
+        <div class="subject-container">
+            विषय :- {{ memo.get_inspection_type_display }} सन {{ memo.inspection_year }} मधील परिच्छेद क्र {{ memo.paragraph_number|default:"" }} दस्त क्र {{ memo.deed_number }} वसुली बाबत
+        </div>
+
+        <div class="reference-container">
+            संदर्भ :- {{ memo.executant_name }} यांचा विनंती अर्ज
+        </div>
+
+        <!-- Main Body -->
+        <div class="main-body justify-text">
+            <p class="p-indent">
+                आपल्या कार्यालयाची सन {{ memo.inspection_year }} मधील दि. {{ memo.registration_date|date:"d.m.Y" }} चा दस्तऐवज क्रं. {{ memo.deed_number }} मधील कमी पडलेला मुद्रांक शुल्क रुपये {{ memo.recovered_stamp_duty|floatformat:2 }} व कमी पडलेली नोंदणी फी रुपये {{ memo.recovered_reg_fee|floatformat:2 }} व शास्ती रुपये {{ memo.recovered_penalty|floatformat:2 }} {{ memo.executant_name }} यांनी ग्रास प्रणालीमध्ये खालील प्रमाणे शासन जमी केलेली आहे
+            </p>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>दस्त क्र</th>
+                        <th>तपशिल</th>
+                        <th>रक्कम (₹)</th>
+                        <th>जमा केल्याचा दि.</th>
+                        <th>डिफेस क्र</th>
+                        <th>डिफेस दिनांक</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td rowspan="3">{{ memo.deed_number }}</td>
+                        <td>मुद्रांक शुल्क</td>
+                        <td>{{ memo.recovered_stamp_duty|floatformat:2 }}</td>
+                        <td>{{ memo.recovered_stamp_duty_date|date:"d.m.Y" }}</td>
+                        <td>{{ memo.recovered_stamp_duty_challan|default:"-" }}</td>
+                        <td>{{ memo.recovered_stamp_duty_date|date:"d.m.Y" }}</td>
+                    </tr>
+                    <tr>
+                        <td>नोंदणी फी</td>
+                        <td>{{ memo.recovered_reg_fee|floatformat:2 }}</td>
+                        <td>{{ memo.recovered_reg_fee_date|date:"d.m.Y" }}</td>
+                        <td>{{ memo.recovered_reg_fee_challan|default:"-" }}</td>
+                        <td>{{ memo.recovered_reg_fee_date|date:"d.m.Y" }}</td>
+                    </tr>
+                    <tr>
+                        <td>शास्ती</td>
+                        <td>{{ memo.recovered_penalty|floatformat:2 }}</td>
+                        <td>{{ memo.recovered_penalty_date|date:"d.m.Y" }}</td>
+                        <td>{{ memo.recovered_penalty_challan|default:"-" }}</td>
+                        <td>{{ memo.recovered_penalty_date|date:"d.m.Y" }}</td>
+                    </tr>
+                    <tr style="font-weight: bold; background: #eee;">
+                        <td colspan="2">एकूण रक्कम</td>
+                        <td>{{ memo.recovered_amount|floatformat:2 }}</td>
+                        <td colspan="3"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p style="margin-bottom: 12px; line-height: 1.5;">
+                अक्षरी एकूण रुपये {{ memo.recovered_amount|floatformat:0 }} अक्षरी <strong>{{ amount_in_words }}</strong> उपरोक्त प्रमाणे या कार्यालयाने ई-चलन डिफेस करुन रक्कम शासन जमा केली आहे.
+            </p>
+
+            <p class="p-indent">
+                दस्त क्रं. {{ memo.deed_number }} ( निष्पादन दि. {{ memo.registration_date|date:"d.m.Y" }} ) मधील कमी पडलेला मुद्रांक शुल्क रुपये {{ memo.recovered_stamp_duty|floatformat:2 }} व कमी पडलेली नोंदणी फी रुपये {{ memo.recovered_reg_fee|floatformat:2 }} व शास्ती रुपये {{ memo.recovered_penalty|floatformat:2 }} अशी एकूण रुपये {{ memo.recovered_amount|floatformat:2 }} शासन जमा केलेली असल्याने सदरचा विषयाकिंत परिच्छेद ({{ memo.paragraph_number|default:"" }}) निर्लेखित करण्यात येत आहे सदरची नोंद आपल्या अभिलेखत नोंद घेण्यात यावी व तसा अहवाल या कार्यालया सादर करावा.
+            </p>
+        </div>
+
+        <!-- Signature Block -->
+        <div class="signature-block">
+            <div class="sig-name-wrap">({{ office.working_officer_name }})</div>
+            <div>{{ office.designation_02 }}</div>
+        </div>
+
+        <!-- Copy To Block -->
+        <div class="copy-to">
+            <strong>प्रत:</strong><br>
+            {{ memo.executant_name }}, रा. {{ memo.executant_address|default:memo.village }} {{ memo.taluka }} यांना माहीतीसाठी अगेषित.
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div id="previewOverlay">
+        <div class="preview-document">
+            <button id="closePreview" onclick="hidePreview()">बंद करा</button>
+            <div id="previewPane"></div>
+        </div>
+    </div>
+
+    <!-- Scripting for Preview -->
+    <script>
+        function showPreview() {
+            const content = document.querySelector('.printable-content').innerHTML;
+            document.getElementById('previewPane').innerHTML = content;
+            document.getElementById('previewOverlay').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+        function hidePreview() {
+            document.getElementById('previewOverlay').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    </script>
+
+</body>
+</html>

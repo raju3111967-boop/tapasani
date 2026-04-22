@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="mr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>महसुली वसुली प्रमाणपत्र - {{ memo.deed_number }}</title>
+    <style>
+        @page {
+            size: legal;
+            margin: 10mm 10mm 10mm 15mm;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans Devanagari', 'Mangal', Arial, sans-serif;
+            font-size: 13px;
+            line-height: 1.40;
+            color: #000;
+            background: #fff;
+            max-width: 215.9mm;
+            margin-top: 10px;
+            padding: 10px 15px;
+        }
+
+        .report-header {
+            margin-bottom: 8px;
+            margin-top: 5px;
+        }
+
+        .office-name {
+            font-size: 14pt;
+            font-weight: bold;
+            margin-bottom: 0px;
+        }
+
+        .office-address {
+            text-align: center;
+            font-size: 14pt;
+            margin-bottom: 4px;
+        }
+
+        .header-contact {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14pt;
+            margin-bottom: 4px;
+        }
+
+        .bold-line {
+            border: 0;
+            border-top: 2px solid #000;
+            margin: 5px 0 15px 0;
+        }
+
+        .report-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 15px 0;
+            text-decoration: underline;
+        }
+
+        .content-body {
+            text-align: justify;
+        }
+
+        p {
+            margin-bottom: 7px;
+            text-align: justify;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+        }
+
+        .data-table th,
+        .data-table td {
+            border: 1px solid #000;
+            padding: 2px 6px;
+            text-align: left;
+        }
+
+        .data-table th {
+            font-weight: bold;
+        }
+
+        .signature-section {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .sig-box {
+            min-width: 250px;
+            page-break-inside: avoid;
+        }
+
+        .print-buttons {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 999;
+        }
+
+        .btn-print,
+        .btn-preview {
+            background: #0d6efd;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        @media print {
+            .print-buttons {
+                display: none !important;
+            }
+
+            body {
+                padding: 0;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="print-buttons">
+        <button class="btn-preview" onclick="window.print()">Print Preview</button>
+        <button class="btn-print" onclick="window.print()">Print</button>
+    </div>
+
+    <!-- Header -->
+    <div class="report-header">
+        <div class="office-name">{{ office.office_name }}</div>
+        <div class="office-address">{{ office.office_address }}</div>
+        <div class="header-contact">
+            <span>फोन नंबर : {{ office.office_phone }}</span>
+            <span>ई-मेल : {{ office.office_email }}</span>
+        </div>
+        <hr class="bold-line">
+    </div>
+
+    <div class="content-body">
+        <p style="display: flex; justify-content: space-between;">
+            <span>क्र कक्ष-तपासणी/{{ memo.get_inspection_type_display }}/दस्त.क्र.{{ memo.deed_number }}{% if memo.paragraph_number %} / परिच्छेद क्र.{{ memo.paragraph_number }}{% endif %} /</span>
+            <span>दिनांक {{ today|date:"d/m/Y" }}</span>
+        </p>
+
+        <h2 class="report-title">महसुली वसुली प्रमाणपत्र</h2>
+        <p style="text-align: center; font-weight: bold; margin-bottom: 10px;">देय रक्कमेचा महाराष्ट्र महसुल संहिता 1966
+            अन्वये करावयाचे मागणीपत्र</p>
+
+        <table class="data-table">
+            <tr>
+                <th colspan="2">तपशिल</th>
+            </tr>
+            <tr>
+                <td width="40%">थकबाकीदाराचे नांव</td>
+                <td>{{ memo.executant_name }}</td>
+            </tr>
+            <tr>
+                <td>थकबाकीदाराचा पत्ता</td>
+                <td>रा. {{ memo.executant_address }}</td>
+            </tr>
+            <tr>
+                <td>वसुल करावयाची रक्कम</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>मुद्रांक शुल्क रुपये</td>
+                <td>{{ memo.stamp_duty_short|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <td>नोंदणी फी रुपये</td>
+                <td>{{ memo.reg_fee_short|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <td><strong>एकुण</strong></td>
+                <td><strong>{{ memo.total_short|floatformat:2 }}</strong></td>
+            </tr>
+        </table>
+
+        <p>2 महाराष्ट्र मुद्रांक अधिनियम 1958 चे कलम 33 अ अन्वये ({{ memo.office_name.name }}) यांनी सदर प्रकरण या
+            कार्यालयाकडे वर्ग केलेले आहे.</p>
+        <p>3 शास्ती रुपये (कमी दिलेल्या मुद्रांक शुल्कावर निष्पादन दिनांक {{ memo.execution_date|date:"d/m/Y" }} ते
+            प्रत्यक्ष वसुल होण्याच्या दिनाकांपर्यत किंवा महिन्याचे भागास 2% पंरतु जास्तीत जास्त कमी पडलेल्या मुद्रांक
+            शुल्काच्या चारपट शास्ती देय राहील.)</p>
+        <p>4 जमिन महसुल थकबाकी समजुन वसुली-महाराष्ट्र मुद्रांक अधिनियमाच्या कलम 46 म्हणून विधीच्या ज्या उपबंधान्वये
+            रक्कम वसुली योग्य असेल तो उपबंध</p>
+        <p>5 थकित वसुलीची पध्दत – जमिन महसुल थकबाकीप्रमाणे</p>
+        <p>6 जिच्या बाबतीत प्रक्रियाचा अवलंब करता येईल त्याचा तपशिल खालील प्रमाणे</p>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>अ.नं.</th>
+                    <th>गांवाचे नांव</th>
+                    <th>तालुका</th>
+                    <th>जिल्हा</th>
+                    <th>मिळकतीचा प्रकार</th>
+                    <th>मिळकतीचा क्रं.</th>
+                    <th>एकुणक्षेत्र</th>
+                    <th>पैकी विक्री क्षेत्र</th>
+                    <th>एकक</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1.</td>
+                    <td>{{ memo.village }}</td>
+                    <td>{{ memo.taluka.name }}</td>
+                    <td>{{ office.district }}</td>
+                    <td>{{ memo.property_type.name }}</td>
+                    <td>{{ memo.survey_number }}</td>
+                    <td>{{ memo.area }}</td>
+                    <td>{{ memo.sold_area }}</td>
+                    <td>{{ memo.unit.name }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>7 रक्कम कोषागारात जमा करण्यासाठी लेखाशिर्ष </p>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>अ.नं.</th>
+                    <th>तपशिल</th>
+                    <th>लेखाशिर्ष</th>
+                    <th>क्रमांक</th>
+                    <th>विभाग</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td rowspan="3">1.</td>
+                    <td rowspan="3">मुद्रांक शुल्क</td>
+                    <td>प्रधानशिर्ष</td>
+                    <td>0030</td>
+                    <td>मुद्रांक व नोंदणी</td>
+                </tr>
+                <tr>
+                    <td>उपप्रधानशिर्ष</td>
+                    <td>02</td>
+                    <td>मुद्रांक न्यायीकेत्तर</td>
+                </tr>
+                <tr>
+                    <td>गौण शिर्ष</td>
+                    <td>103 (3)</td>
+                    <td>अपुरे मुद्रांक शुल्क</td>
+                </tr>
+                <tr>
+                    <td rowspan="3">2.</td>
+                    <td rowspan="3">शास्ती</td>
+                    <td>प्रधानशिर्ष</td>
+                    <td>0030</td>
+                    <td>मुद्रांक व नोंदणी</td>
+                </tr>
+                <tr>
+                    <td>उपप्रधानशिर्ष</td>
+                    <td>02</td>
+                    <td>मुद्रांक न्यायीकेत्तर</td>
+                </tr>
+                <tr>
+                    <td>गौण शिर्ष</td>
+                    <td>103 (3)</td>
+                    <td>अपुरे मुद्रांक शुल्क</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>संगणक सांकेतांक</td>
+                    <td colspan="3">0030055301</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>8 नोंदणी व मुद्रांक विभागाची वसुली ही ग्रास प्रणाली द्वारे करण्यात येते. तरी अपेक्षीत वसुली ग्रास
+            प्रणालीद्वारेच करण्यात यावी</p>
+
+        <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+            <div style="text-align: left;">
+                <div>ठिकाण {{ office.district }}</div>
+                <div>दिनांक {{ today|date:"d/m/Y" }}</div>
+            </div>
+            <div class="sig-box">
+                <div style="height: 100px;"></div> <!-- Signature Space -->
+                <div style="font-weight: bold;">({{ office.working_officer_name }})</div>
+                <div>{{ office.designation_02 }}</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 10px;">
+            <p>प्रति,</p>
+            <p>({{ memo.competent_authority.name }}) यांना माहीतीसाठी व पुढील कार्यवाहीसाठी</p>
+            <p>प्रत</p>
+            <p>1 मा. जिल्हाधिकारी ( {{ office.district }} ) यांना माहीतीसाठी व उचीत कार्यवाहीसाठी सविनय सादर</p>
+            <p>2 ({{ office.divisional_office_name }}) यांना माहीतीसाठी सविनय सादर</p>
+            <p>3 कामगार तलाठी ({{ memo.village }}) तालुका ({{ memo.taluka.name }}) जिल्हा ({{ office.district }}) यांना
+                माहीतीसाठी व उचीत कार्यवाहीसाठी सविनय सादर</p>
+            <p>4 ({{ memo.office_name.name }}) यांना माहीतीसाठी व उचीत कार्यवाहीसाठी सविनय सादर</p>
+            <p style="margin-left: 15px;">2/-सदर रक्कमेचा बोजा 7/12 उता-यावर नोंद घेणे कामी संबंधीत कार्यालयात पाठपुरावा
+                करुन मुद्रांक शुल्क बोजाचा 7/12 उता-यावर नोंद झाल्यावर त्याची एक प्रत आपल्या अहवालसह या कार्यालयास सादर
+                करावी.</p>
+            <p>5 {{ memo.executant_name }}, रा. {{ memo.executant_address }} यांना माहीतीसाठी अगेषित</p>
+        </div>
+    </div>
+
+</body>
+
+</html>

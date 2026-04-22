@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}डॅशबोर्ड - तपासणी मेमो{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <h2><i class="bi bi-speedometer2"></i> डॅशबोर्ड</h2>
+    <span class="text-muted" style="font-size:12px;">
+        <i class="bi bi-calendar3 me-1"></i> {{ today|default:"" }}
+    </span>
+</div>
+
+<!-- Stat Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+        <div class="stat-card bg-primary-gradient">
+            <div class="stat-icon"><i class="bi bi-journal-text"></i></div>
+            <div class="stat-value">{{ total_cases }}</div>
+            <div class="stat-label">एकूण प्रकरणे</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card bg-warning-gradient">
+            <div class="stat-icon"><i class="bi bi-clock-history"></i></div>
+            <div class="stat-value">{{ pending_cases }}</div>
+            <div class="stat-label">प्रलंबित प्रकरणे</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card bg-success-gradient">
+            <div class="stat-icon"><i class="bi bi-check2-all"></i></div>
+            <div class="stat-value">{{ recovered_cases }}</div>
+            <div class="stat-label">वसुली झालेली</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card bg-info-gradient">
+            <div class="stat-icon"><i class="bi bi-currency-rupee"></i></div>
+            <div class="stat-value">₹{{ balance_sum|floatformat:0|intcomma }}</div>
+            <div class="stat-label">एकूण शिल्लक</div>
+        </div>
+    </div>
+</div>
+
+<!-- Amount Summary -->
+<div class="row g-3 mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-currency-rupee"></i> रक्कम सारांश
+            </div>
+            <div class="card-body p-0">
+                <div class="table-container">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>एकूण कमी रक्कम</th>
+                                <th>एकूण शास्ती</th>
+                                <th>एकूण रक्कम</th>
+                                <th>एकूण वसुली</th>
+                                <th>एकूण शिल्लक</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="fw-bold">₹{{ total_short_sum|floatformat:2|intcomma }}</td>
+                                <td class="fw-bold">₹{{ total_penalty_sum|floatformat:2|intcomma }}</td>
+                                <td class="fw-bold">₹{{ total_amount_sum|floatformat:2|intcomma }}</td>
+                                <td class="fw-bold text-success">₹{{ recovered_sum|floatformat:2|intcomma }}</td>
+                                <td class="fw-bold text-danger">₹{{ balance_sum|floatformat:2|intcomma }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Type-wise Summary -->
+<div class="row g-3 mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-pie-chart"></i> तपासणी प्रकारानुसार सारांश
+            </div>
+            <div class="card-body p-0">
+                <div class="table-container">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>तपासणी प्रकार</th>
+                                <th class="text-center">एकूण</th>
+                                <th class="text-center">प्रलंबित</th>
+                                <th class="text-center">वसुली</th>
+                                <th class="text-end">एकूण रक्कम</th>
+                                <th class="text-end">वसूल रक्कम</th>
+                                <th class="text-end">शिल्लक</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in type_summary %}
+                            <tr>
+                                <td><strong>{{ item.label }}</strong></td>
+                                <td class="text-center">{{ item.total }}</td>
+                                <td class="text-center">
+                                    {% if item.pending > 0 %}
+                                    <span class="badge-pending">{{ item.pending }}</span>
+                                    {% else %}
+                                    <span class="text-muted">0</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if item.recovered > 0 %}
+                                    <span class="badge-recovered">{{ item.recovered }}</span>
+                                    {% else %}
+                                    <span class="text-muted">0</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">₹{{ item.total_amount|floatformat:2|intcomma }}</td>
+                                <td class="text-end text-success">₹{{ item.recovered_amount|floatformat:2|intcomma }}</td>
+                                <td class="text-end text-danger">₹{{ item.balance|floatformat:2|intcomma }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row g-3">
+    <div class="col-md-4">
+        <a href="{% url 'inspection_create' %}" class="report-card">
+            <div class="report-icon" style="background:linear-gradient(135deg,#1a3a5c,#2c5282);">
+                <i class="bi bi-plus-lg"></i>
+            </div>
+            <div>
+                <div class="report-title">नवीन तपासणी नोंद</div>
+                <div class="report-desc">नवीन मेमो प्रविष्ट करा</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{% url 'report_pending' %}" class="report-card">
+            <div class="report-icon" style="background:linear-gradient(135deg,#dd6b20,#ed8936);">
+                <i class="bi bi-clock"></i>
+            </div>
+            <div>
+                <div class="report-title">प्रलंबित अहवाल</div>
+                <div class="report-desc">सर्व प्रलंबित प्रकरणे पहा</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{% url 'master_dashboard' %}" class="report-card">
+            <div class="report-icon" style="background:linear-gradient(135deg,#276749,#38a169);">
+                <i class="bi bi-database"></i>
+            </div>
+            <div>
+                <div class="report-title">मास्टर डेटा</div>
+                <div class="report-desc">मास्टर टेबल्स व्यवस्थापन</div>
+            </div>
+        </a>
+    </div>
+</div>
+{% endblock %}

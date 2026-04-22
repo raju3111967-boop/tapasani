@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if office %}संपादन{% else %}नवीन{% endif %} - कार्यालयाची माहिती{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <h2><i class="bi bi-building"></i> {% if office %}कार्यालयाची माहिती संपादन{% else %}नवीन कार्यालयाची माहिती{% endif %}</h2>
+    <div class="d-flex gap-2">
+        <a href="{% url 'office_info_list' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> मागे
+        </a>
+    </div>
+</div>
+
+<!-- Form -->
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- Section 1: कार्यालयाची मूलभूत माहिती -->
+            <div class="mb-4">
+                <h5 class="mb-3" style="color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 8px;">
+                    <i class="bi bi-info-circle me-2"></i>कार्यालयाची मूलभूत माहिती
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            <i class="bi bi-building me-1"></i>कार्यालयाचे नांव <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" name="office_name" class="form-control" required
+                               value="{% if office %}{{ office.office_name }}{% endif %}"
+                               placeholder="कार्यालयाचे नांव प्रविष्ट करा">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            <i class="bi bi-telephone me-1"></i>कार्यालयाचा फोन नंबर
+                        </label>
+                        <input type="text" name="office_phone" class="form-control"
+                               value="{% if office %}{{ office.office_phone }}{% endif %}"
+                               placeholder="फोन नंबर प्रविष्ट करा">
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">
+                            <i class="bi bi-geo-alt me-1"></i>कार्यालयाचा पत्ता
+                        </label>
+                        <textarea name="office_address" class="form-control" rows="3"
+                                  placeholder="कार्यालयाचा पत्ता प्रविष्ट करा">{% if office %}{{ office.office_address }}{% endif %}</textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            <i class="bi bi-envelope me-1"></i>कार्यालयाचा ई-मेल
+                        </label>
+                        <input type="email" name="office_email" class="form-control"
+                               value="{% if office %}{{ office.office_email }}{% endif %}"
+                               placeholder="ई-मेल प्रविष्ट करा">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: भौगोलिक माहिती -->
+            <div class="mb-4">
+                <h5 class="mb-3" style="color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 8px;">
+                    <i class="bi bi-map me-2"></i>भौगोलिक माहिती
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            <i class="bi bi-geo-alt-fill me-1"></i>जिल्हा
+                        </label>
+                        <input type="text" name="district" class="form-control"
+                               value="{% if office %}{{ office.district }}{% endif %}"
+                               placeholder="जिल्हा प्रविष्ट करा">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            <i class="bi bi-diagram-3 me-1"></i>विभागाचे नांव
+                        </label>
+                        <input type="text" name="division_name" class="form-control"
+                               value="{% if office %}{{ office.division_name }}{% endif %}"
+                               placeholder="विभागाचे नांव प्रविष्ट करा">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: विभागीय कार्यालय माहिती -->
+            <div class="mb-4">
+                <h5 class="mb-3" style="color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 8px;">
+                    <i class="bi bi-building-gear me-2"></i>विभागीय कार्यालय माहिती
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            <i class="bi bi-building me-1"></i>विभागीय कार्यालयाचे नांव
+                        </label>
+                        <input type="text" name="divisional_office_name" class="form-control"
+                               value="{% if office %}{{ office.divisional_office_name }}{% endif %}"
+                               placeholder="विभागीय कार्यालयाचे नांव प्रविष्ट करा">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            <i class="bi bi-geo-alt me-1"></i>विभागीय कार्यालयाचा पत्ता
+                        </label>
+                        <input type="text" name="divisional_office_address" class="form-control"
+                               value="{% if office %}{{ office.divisional_office_address }}{% endif %}"
+                               placeholder="विभागीय कार्यालयाचा पत्ता प्रविष्ट करा">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: पदनाम व अधिकारी माहिती -->
+            <div class="mb-4">
+                <h5 class="mb-3" style="color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 8px;">
+                    <i class="bi bi-person-badge me-2"></i>पदनाम व अधिकारी माहिती
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            <i class="bi bi-person me-1"></i>पदनाम 01
+                        </label>
+                        <input type="text" name="designation_01" class="form-control"
+                               value="{% if office %}{{ office.designation_01 }}{% endif %}"
+                               placeholder="पदनाम 01 प्रविष्ट करा">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            <i class="bi bi-person me-1"></i>पदनाम 02
+                        </label>
+                        <input type="text" name="designation_02" class="form-control"
+                               value="{% if office %}{{ office.designation_02 }}{% endif %}"
+                               placeholder="पदनाम 02 प्रविष्ट करा">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            <i class="bi bi-person-check me-1"></i>कार्यरत अधिका-यांचे नांव
+                        </label>
+                        <input type="text" name="working_officer_name" class="form-control"
+                               value="{% if office %}{{ office.working_officer_name }}{% endif %}"
+                               placeholder="कार्यरत अधिका-यांचे नांव प्रविष्ट करा">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            <i class="bi bi-person-gear me-1"></i>प्रशासकिय अधिकारी यांचे नांव
+                        </label>
+                        <input type="text" name="administrative_officer_name" class="form-control"
+                               value="{% if office %}{{ office.administrative_officer_name }}{% endif %}"
+                               placeholder="प्रशासकिय अधिकारी यांचे नांव प्रविष्ट करा">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            <i class="bi bi-person-lines-fill me-1"></i>वरिष्ठ लिपीकांचे नांव
+                        </label>
+                        <input type="text" name="senior_clerk_name" class="form-control"
+                               value="{% if office %}{{ office.senior_clerk_name }}{% endif %}"
+                               placeholder="वरिष्ठ लिपीकांचे नांव प्रविष्ट करा">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            <i class="bi bi-person-lines-fill me-1"></i>कनिष्ठ लिपीकांचे नांव
+                        </label>
+                        <input type="text" name="junior_clerk_name" class="form-control"
+                               value="{% if office %}{{ office.junior_clerk_name }}{% endif %}"
+                               placeholder="कनिष्ठ लिपीकांचे नांव प्रविष्ट करा">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="d-flex gap-2 justify-content-end">
+                <a href="{% url 'office_info_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> रद्द करा
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> {% if office %}अपडेट करा{% else %}जोडा{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

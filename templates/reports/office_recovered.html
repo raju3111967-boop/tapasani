@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}कार्यालयनिहाय वसुली अहवाल{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h2><i class="bi bi-building-check text-success"></i> {{ report_title }}</h2>
+    <div class="no-print d-flex gap-2">
+        <button onclick="window.print()" class="btn btn-outline-primary btn-sm"><i class="bi bi-printer"></i> प्रिंट</button>
+        <a href="{% url 'reports_dashboard' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> मागे</a>
+    </div>
+</div>
+<div class="filter-bar no-print">
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-3"><label class="form-label">तपासणी प्रकार</label>
+            <select name="type" class="form-select"><option value="">सर्व</option>{% for code, label in inspection_types %}<option value="{{ code }}" {% if selected_type == code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+        <div class="col-md-2"><label class="form-label">वर्ष</label>
+            <select name="year" class="form-select"><option value="">सर्व</option>{% for yr in years %}<option value="{{ yr.id }}" {% if selected_year == yr.id|stringformat:"d" %}selected{% endif %}>{{ yr.year }}</option>{% endfor %}</select></div>
+        <div class="col-md-auto">
+            <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-filter"></i> फिल्टर</button>
+            <a href="{% url 'report_office_recovered' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-x"></i> रीसेट</a></div>
+    </form>
+</div>
+<div class="card">
+    <div class="card-header"><i class="bi bi-building-check"></i> कार्यालयनिहाय वसुली</div>
+    <div class="card-body p-0">
+        <div class="table-container">
+            <table class="table mb-0">
+                <thead><tr><th>कार्यालय</th><th class="text-center">प्रकरणे</th><th class="text-end">एकूण रक्कम</th><th class="text-end">वसूल रक्कम</th></tr></thead>
+                <tbody>
+                    {% for row in office_data %}
+                    <tr>
+                        <td><strong>{{ row.office_name__name }}</strong></td>
+                        <td class="text-center"><span class="badge-recovered">{{ row.count }}</span></td>
+                        <td class="text-end">₹{{ row.total_amount|floatformat:2|intcomma }}</td>
+                        <td class="text-end text-success fw-bold">₹{{ row.total_recovered|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% empty %}<tr><td colspan="4" class="text-center py-4 text-muted">डेटा नाही.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <title>अंतिम आदेश – मुद्रांक शुल्क वसुलीचा आदेश</title>
+    <style>
+        @page { 
+            size: legal; 
+            margin: 10mm 15mm; 
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Noto Sans Devanagari', 'Mangal', Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #000;
+            background: #fff;
+            max-width: 215.9mm;
+            margin: 0 auto;
+            padding: 10px 15px;
+        }
+        
+        /* Custom Report Header from Gemini Memories */
+        .custom-report-header {
+            font-family: 'Noto Sans Devanagari', 'Mangal', Arial, sans-serif;
+            border-bottom: 1px solid #000000;
+            margin-bottom: 10px;
+            margin-top: 20px;
+            padding-bottom: 5px;
+        }
+        .header-title {
+            text-align: center;
+            font-size: 14pt;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .header-address {
+            text-align: center;
+            font-size: 14pt;
+            margin-bottom: 4px;
+        }
+        .header-contact {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14pt;
+            margin-bottom: 4px;
+        }
+
+        .notice-title {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .body-wrap { 
+            text-align: justify; 
+        }
+        p { margin-bottom: 10px; text-align: justify; }
+        .p-indent { text-indent: 40px; }
+        .notice-content { margin-left: 5px; margin-right: 5px; }
+        
+        .signature-section { 
+            text-align: center; 
+            min-width: 200px;
+        }
+        .signature-name { font-weight: bold; }
+        
+        .print-buttons {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 999;
+        }
+        .btn-print, .btn-preview {
+            background: #0d6efd;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: inherit;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .btn-print:hover, .btn-preview:hover { background: #0b5ed7; }
+        
+        #previewOverlay {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        #previewBox {
+            background: #fff;
+            max-width: 850px;
+            margin: 40px auto;
+            padding: 40px;
+            border-radius: 8px;
+            position: relative;
+        }
+        #closePreview {
+            position: absolute; top: 15px; right: 20px;
+            background: #dc3545; color: #fff;
+            border: none; border-radius: 5px;
+            padding: 5px 15px; cursor: pointer; font-size: 16px;
+        }
+        @media print {
+            .print-buttons { display: none !important; }
+            #previewOverlay { display: none !important; }
+            body { 
+                padding: 0; 
+                margin-left: 10mm; 
+                margin-right: 10mm; 
+            }
+            @page { 
+                size: legal; 
+                margin: 10mm 15mm; 
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="print-buttons">
+    <button class="btn-preview" onclick="showPreview()">Print Preview</button>
+    <button class="btn-print" onclick="window.print()">Print</button>
+</div>
+
+<!-- Standardized Letterhead Header -->
+<div class="custom-report-header">
+    <div class="header-title">{{ office.office_name }}</div>
+    <div class="header-address">{{ office.office_address }}</div>
+    <div class="header-contact">
+        <span style="font-weight: bold;">फोन नंबर : {{ office.office_phone }}</span>
+        <span style="font-weight: bold;">ई-मेल : {{ office.office_email }}</span>
+    </div>
+</div>
+
+<div class="notice-content">
+    <div class="body-wrap">
+       <p style="text-align: center;">--------------------------------------------------------------------------------------------------------------------------------------------------</p>
+       <p style="text-align: center;">संदर्भ :-</p>
+       <p style="text-align: center;">1. {{ memo.office_name }} यांचेकडील पत्र क्र {{ memo.memo_number }}</p>
+       <p style="text-align: center;">2. या कार्यालयाची दिनांक {{ second_notice_date|date:"d/m/Y"|default:"(दुस-या नोटीसीचा इश्यु दिनांक)" }} ची वसुलीची नोटीस</p>
+       <p style="text-align: center;">3. या कार्यालयाची दिनांक {{ hearing_notice_date|date:"d/m/Y"|default:"(सुनावणी नोटीसीचा इश्यु दिनांक)" }} ची वसुलीची नोटीस</p>
+       <p style="text-align: center;">--------------------------------------------------------------------------------------------------------------------------------------------------</p>
+
+        <p style="display: flex; justify-content: space-between;">
+            <span>क्र कक्ष-तपासणी/{{ memo.get_inspection_type_display }}/दस्त.क्र.{{ memo.deed_number }} / {{ memo.inspection_year }} /</span>
+            <span>दिनांक {{ today|date:"d/m/Y" }}</span>
+        </p>
+
+        <h3 class="notice-title">मुद्रांक शुल्क वसुली अंतिम आदेश</h3>
+
+        <p style="text-align: center; margin-bottom: 20px;">
+            <b>विषय :- </b>महाराष्ट्र मुद्रांक अधिनियम 1958 अन्वये {{ memo.get_inspection_type_display }} मधील दस्त क्रमांक {{ memo.deed_number }} मधील मुद्रांक वसुल बाबत 
+        </p>
+
+        <h4 style="margin-bottom: 10px;"><b>मुद्रांक शुल्क आदेश</b></h4>
+
+        <p class="p-indent">
+            {{ memo.office_name }} या कार्यालयात दस्तऐवज क्र.{{ memo.deed_number }} नोंदविण्यात आलेला आहे. तपासणी पथकांने {{ memo.inspection_year }} या वर्षाची तपासणी केली असता तपासणीच्या अनुषगांने विषयाकिंत दस्तऐवज आक्षेपीत आढूळून आला आहे.त्यानुसार कमी मुद्रांक शुल्क रुपये {{ memo.stamp_duty_short|floatformat:2 }} नोंदणी फी रुपये {{ memo.reg_fee_short|floatformat:2 }} असे एकुण रुपये {{ memo.total_short|floatformat:2 }} कमी रुपये शासन जमा केल्याचे आढळून आले आहे.
+        </p>
+
+        <p class="p-indent">
+            प्रस्तूत प्रकरणी संबंधीत {{ memo.office_name }} यांनी व या कार्यालयाने संदर्भाकिंत मुद्रांक शुल्क वसुलीच्या नोटीसा देण्यात आलेल्या आहेत.तथापी संबंधीत पक्षकार {{ memo.executant_name }},रा.{{ memo.executant_address }} यांनी मुद्रांक शुल्क व शास्तीची रक्कम विहीत, रक्कम शासन जमा केलेली नाही अथवा आपले लेखी म्हणणे {{ memo.office_name }} या कार्यालयाकडे अथवा या कार्यालयास सादर केलेले नाही.
+        </p>
+
+        <p class="p-indent">
+            महाराष्ट्र मुद्रांक अधिनियम 1958 चे कलम 33 अ अन्वये {{ memo.office_name }} यांनी सादर प्रकरण या कार्यालयाकडे वर्ग केलेले आहे.
+        </p>
+
+        <p class="p-indent">
+            महाराष्ट्र मुद्रांक अधिनियमातील (मिळकतीचे खरे बाजारमुल्य नियम 1995 नियम (6)1 दस्तास कमी पडलेले मुद्रांक शुल्क व शास्ती भरणे बाबत संदर्भ क्र 3 अन्वये संबंधीत पक्षकार यांना सुनावणी नोटीस देण्यात आली होती.सदर सुनावणीस संबंधीत पक्षकार अथवा त्यांचे प्रतिनिधी सुनावणीस उपस्थित राहीले नाहीत अथवा या कार्यालयास लेखी म्हणणे सादर केले नाही.
+        </p>
+
+        <p class="p-indent">
+            सबब महाराष्ट्र मुद्रांक अधिनियमो कलम 32 अन्वये खालील प्रमाणे आदेश देण्यात येत आहे.
+        </p>
+
+        <ol style="margin-left: 20px; text-align: justify; margin-bottom: 15px;">
+            <li style="margin-bottom: 5px;">महाराष्ट्र मुद्रांक अधिनियम 1958 चे कलम 32 अ चे अधिन राहुन आदेश देण्यात येत आहे.</li>
+            <li style="margin-bottom: 5px;">महाराष्ट्र मुद्रांक अधिनियमाचे अन्वये उपरोक्त कमी पडलेला मुद्रांक शुल्क व नोंदणी फी रक्कमेचा भरणा शासनास 30 दिवसांचे आत करण्यात जमा करावे.</li>
+            <li style="margin-bottom: 5px;">महाराष्ट्र मुद्रांक अधिनियम 1958 चे कलम 39 प्रमाणे कमी पडलेल्या मुद्रांक शुल्काच्या रक्कमेवर दस्त निष्पादनाचे दिनांकापासुन दरमहा 2% दराने परंतु जास्तीत जास्त चौपट शास्ती देय राहील</li>
+            <li style="margin-bottom: 5px;">सदरचे आदेश महाराष्ट्र मुद्रांक अधिनियम 1958 चे कलम 53 अ चे अधिन राहून देण्यात येत आहे.</li>
+        </ol>
+
+        <p class="p-indent">
+            उपरोक्त रक्कमेचा भरणा ग्रास प्रणालीचया ई-चलन ग्रासप्रणालीद्वारे êü https//gras. mahakosh. gov.in /echallan या वेब लिंकद्वारे STD-JT DISTRICT REGISTRA NASHIK 104 या ऑफिसचे नांव सिलेक्ट करुन मुद्रांक रक्कमेसाठी 0030053501व शास्तीसाठी 0030055301 या संगणक सांकेताखाली available bank एकुण मध्ये बॅकेचे शाखामध्ये भरणा करावा व भरणा केलेल्या चलनाची एक प्रत या कार्यालयास सादर करावी.
+        </p>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+        <div style="text-align: left;">
+            <div>ठिकाण {{ office.district }}</div>
+            <div>दिनांक {{ today|date:"d/m/Y" }}</div>
+        </div>
+        <div class="signature-section" style="margin-top: 0;">
+            <div class="signature-name">({{ office.working_officer_name }})</div>
+            <div class="signature-designation">({{ office.designation_02 }})</div>
+        </div>
+    </div>
+
+    <div style="margin-top: 15px; margin-left: 0px;">
+        <table style="width: 100%; border: none;">
+            <tr>
+                <td style="vertical-align: top; width: 40px;">प्रति,</td>
+                <td>
+                    {{ memo.executant_name }},रा.{{ memo.executant_address }} यांना माहीतीसाठी व पुढील कार्यवाहीसाठी अगेषित
+                </td>
+            </tr>
+            <tr>
+                <td style="vertical-align: top; padding-top: 10px;">प्रत</td>
+                <td style="padding-top: 10px;">
+                    {{ memo.office_name }} यांना माहीतीसाठी सादर
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div id="previewOverlay">
+    <div id="previewBox">
+        <button id="closePreview" onclick="hidePreview()">×</button>
+        <div id="previewContent"></div>
+    </div>
+</div>
+
+<script>
+function showPreview() {
+    const content = document.body.cloneNode(true);
+    content.querySelector('.print-buttons').remove();
+    document.getElementById('previewContent').innerHTML = content.innerHTML;
+    document.getElementById('previewOverlay').style.display = 'block';
+}
+
+function hidePreview() {
+    document.getElementById('previewOverlay').style.display = 'none';
+}
+</script>
+
+</body>
+</html>

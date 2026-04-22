@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}वार्षिक वसुली अहवाल{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="bi bi-calendar-year" style="color:#805ad5;"></i> {{ report_title }}</h2>
+    <div class="no-print d-flex gap-2">
+        <button onclick="window.print()" class="btn btn-outline-primary btn-sm"><i class="bi bi-printer"></i> प्रिंट</button>
+        <a href="{% url 'reports_dashboard' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> मागे</a>
+    </div>
+</div>
+
+<div class="filter-bar no-print">
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label">तपासणी प्रकार</label>
+            <select name="type" class="form-select">
+                <option value="">सर्व प्रकार</option>
+                {% for code, label in inspection_types %}
+                <option value="{{ code }}" {% if selected_type == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">कार्यालय</label>
+            <select name="office" class="form-select">
+                <option value="">सर्व</option>
+                {% for off in offices %}
+                <option value="{{ off.id }}" {% if selected_office == off.id|stringformat:"d" %}selected{% endif %}>{{ off.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-auto">
+            <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-filter"></i> फिल्टर</button>
+            <a href="{% url 'report_yearly' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-x"></i> रीसेट</a>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-header"><i class="bi bi-calendar-year"></i> वर्षनिहाय तपशील</div>
+    <div class="card-body p-0">
+        <div class="table-container">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>वर्ष</th>
+                        <th class="text-center">प्रकरणे</th>
+                        <th class="text-end">एकूण कमी</th>
+                        <th class="text-end">शास्ती</th>
+                        <th class="text-end">एकूण रक्कम</th>
+                        <th class="text-end">वसूल</th>
+                        <th class="text-end">शिल्लक</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in yearly %}
+                    <tr>
+                        <td><strong>{{ row.year|date:"Y" }}</strong></td>
+                        <td class="text-center">{{ row.count }}</td>
+                        <td class="text-end">₹{{ row.total_short|floatformat:2|intcomma }}</td>
+                        <td class="text-end">₹{{ row.total_penalty|floatformat:2|intcomma }}</td>
+                        <td class="text-end fw-bold">₹{{ row.total_amount|floatformat:2|intcomma }}</td>
+                        <td class="text-end text-success">₹{{ row.total_recovered|floatformat:2|intcomma }}</td>
+                        <td class="text-end text-danger">₹{{ row.total_balance|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="7" class="text-center py-4 text-muted">कोणताही डेटा आढळला नाही.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

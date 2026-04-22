@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}वसुली अहवाल - तपासणी मेमो{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="bi bi-check2-all text-success"></i> {{ report_title }}</h2>
+    <div class="no-print d-flex gap-2">
+        <button onclick="window.print()" class="btn btn-outline-primary btn-sm"><i class="bi bi-printer"></i> प्रिंट</button>
+        <a href="{% url 'reports_dashboard' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> मागे</a>
+    </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="filter-bar no-print">
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label">तपासणी प्रकार</label>
+            <select name="type" class="form-select">
+                <option value="">सर्व प्रकार</option>
+                {% for code, label in inspection_types %}
+                <option value="{{ code }}" {% if selected_type == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">वर्ष</label>
+            <select name="year" class="form-select">
+                <option value="">सर्व</option>
+                {% for yr in years %}
+                <option value="{{ yr.id }}" {% if selected_year == yr.id|stringformat:"d" %}selected{% endif %}>{{ yr.year }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">कार्यालय</label>
+            <select name="office" class="form-select">
+                <option value="">सर्व</option>
+                {% for off in offices %}
+                <option value="{{ off.id }}" {% if selected_office == off.id|stringformat:"d" %}selected{% endif %}>{{ off.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-auto">
+            <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-filter"></i> फिल्टर</button>
+            <a href="{% url 'report_recovered' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-x"></i> रीसेट</a>
+        </div>
+    </form>
+</div>
+
+{% if type_summary %}
+<div class="card mb-3">
+    <div class="card-header"><i class="bi bi-pie-chart"></i> प्रकारानुसार सारांश</div>
+    <div class="card-body p-0">
+        <div class="table-container">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>तपासणी प्रकार</th>
+                        <th class="text-center">प्रकरणे</th>
+                        <th class="text-end">एकूण रक्कम</th>
+                        <th class="text-end">वसूल रक्कम</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in type_summary %}
+                    <tr>
+                        <td>{{ item.label }}</td>
+                        <td class="text-center"><span class="badge-recovered">{{ item.count }}</span></td>
+                        <td class="text-end">₹{{ item.total|floatformat:2|intcomma }}</td>
+                        <td class="text-end text-success fw-bold">₹{{ item.recovered|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr style="background:#f0f2f5; font-weight:700;">
+                        <td>एकूण</td>
+                        <td class="text-center">{{ totals.total_count }}</td>
+                        <td class="text-end">₹{{ totals.total_amount|floatformat:2|intcomma }}</td>
+                        <td class="text-end text-success">₹{{ totals.total_recovered|floatformat:2|intcomma }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header"><i class="bi bi-list-ul"></i> वसुली झालेली प्रकरणे ({{ memos.count }})</div>
+    <div class="card-body p-0">
+        <div class="table-container">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>अं.नं.</th>
+                        <th>प्रकार</th>
+                        <th>दस्त क्र.</th>
+                        <th>निष्पादन दिनांक</th>
+                        <th>कार्यालय</th>
+                        <th class="text-end">एकूण रक्कम</th>
+                        <th class="text-end">वसूल रक्कम</th>
+                        <th>शेरा</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for memo in memos %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><span class="badge bg-secondary" style="font-size:10px;">{{ memo.get_inspection_type_display }}</span></td>
+                        <td><strong>{{ memo.deed_number }}</strong></td>
+                        <td>{{ memo.execution_date|date:"d/m/Y" }}</td>
+                        <td>{{ memo.office_name }}</td>
+                        <td class="text-end fw-bold">₹{{ memo.total_amount|floatformat:2|intcomma }}</td>
+                        <td class="text-end"><span class="badge-recovered">₹{{ memo.recovered_amount|floatformat:2|intcomma }}</span></td>
+                        <td>{{ memo.remark|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8" class="text-center py-4 text-muted">कोणतीही वसुली झालेली प्रकरणे आढळली नाहीत.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,396 @@
+<!-- FINAL TEMPLATE - DO NOT MODIFY -->
+<!-- AUTO CHANGES STRICTLY DISABLED -->
+<!DOCTYPE html>
+<html lang="mr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>कमी रक्कम टिप्पणी - {{ memo.deed_number }}</title>
+    <style>
+        /* Base Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        @page {
+            size: legal;
+            margin: 8mm 15mm 8mm 15mm;
+        }
+
+        body {
+            font-family: 'Noto Sans Devanagari', 'Mangal', Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.25;
+            color: #000;
+            background: #fff;
+            width: 215.9mm;
+            height: 355.6mm;
+            margin: 0 auto;
+            overflow: hidden;
+            -webkit-print-color-adjust: exact;
+        }
+
+        .page-wrap {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            padding: 5px;
+            page-break-inside: avoid;
+        }
+
+        /* HEADER STRUCTURE */
+        .header {
+            width: 100%;
+            margin-bottom: 0px;
+            text-align: center;
+        }
+
+        .office-name-head {
+            font-size: 16pt;
+            font-weight: bold;
+            margin-bottom: 1px;
+        }
+
+        .office-address-head {
+            font-size: 12pt;
+            margin-bottom: 2px;
+        }
+
+        .contact-row-head {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10pt;
+            width: 100%;
+            margin-top: 2px;
+        }
+
+        .phone-left {
+            text-align: left;
+        }
+
+        .email-right {
+            text-align: right;
+        }
+
+        .bold-line-head {
+            border-top: 3px solid #000;
+            margin-top: 2px;
+            margin-bottom: 8px;
+            width: 100%;
+        }
+
+        /* CONTENT ALIGNMENT */
+        .left-align {
+            text-align: left;
+            margin-bottom: 5px;
+        }
+
+        .center-align {
+            text-align: center;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .justify-text {
+            text-align: justify;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: normal;
+        }
+
+        .paragraph {
+            margin-bottom: 8px;
+            text-indent: 50px;
+        }
+
+        /* Table (Compact) */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 6px 0;
+            font-size: 10pt;
+        }
+
+        .data-table th,
+        .data-table td {
+            border: 1px solid #000;
+            padding: 4px 6px;
+            text-align: center;
+        }
+
+        .data-table th {
+            background: #f2f2f2;
+            font-weight: bold;
+        }
+
+        /* Signature Section */
+        .signature-footer {
+            margin-top: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .quad-sig {
+            display: flex;
+            justify-content: space-between;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 10pt;
+        }
+
+        .quad-col {
+            width: 24%;
+            font-weight: bold;
+            margin-top: 40px; /* Space for signatures */
+        }
+
+        .final-sig {
+            text-align: right;
+            padding-right: 30px;
+            margin-top: 50px; /* Force 2-3 lines space ABOVE */
+        }
+
+        .sig-name {
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        /* Buttons */
+        .btn-controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .btn-blue {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        #previewOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 2000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .preview-content {
+            background: #fff;
+            width: 215.9mm;
+            min-height: 355.6mm;
+            margin: 0 auto;
+            padding: 0;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        #closePreview,
+        #printFromPreview {
+            position: fixed;
+            top: 20px;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 2100;
+        }
+
+        #closePreview {
+            left: 20px;
+            background: #dc3545;
+            color: #fff;
+        }
+
+        #printFromPreview {
+            right: 20px;
+            background: #0d6efd;
+            color: #fff;
+        }
+
+        @media print {
+
+            .btn-controls,
+            #previewOverlay,
+            #closePreview,
+            #printFromPreview {
+                display: none !important;
+            }
+
+            body {
+                width: 100%;
+                height: auto;
+                overflow: visible;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="btn-controls">
+        <button class="btn-blue" onclick="showPreview()">Print Preview</button>
+        <button class="btn-blue" onclick="window.print()">Print</button>
+    </div>
+
+    <div class="page-wrap" id="reportContent">
+        <!-- HEADER STRUCTURE -->
+        <div class="header">
+            <div class="office-name-head">{{ office.office_name }}</div>
+            <div class="office-address-head">{{ office.office_address }}</div>
+            <div class="contact-row-head">
+                <div class="phone-left">फोन नंबर : {{ office.office_phone }}</div>
+                <div class="email-right">ई-मेल : {{ office.office_email }}</div>
+            </div>
+            <div class="bold-line-head"></div>
+        </div>
+
+        <!-- META INFORMATION -->
+        <div class="meta-row">
+            <div>कार्यालयीन टिप्पणी</div>
+            <div>दिनांक :- {{ today|date:"d/m/Y" }}</div>
+        </div>
+
+        <div class="left-align">प्रति,</div>
+
+        <div class="center-align">
+            विषय :- दस्त तपासणी सन {{ memo.inspection_year }} मधील परिच्छेद क्र ({{ form.paragraph_number.value }}) दस्त क्र {{ memo.deed_number }} वसुली बाबत
+        </div>
+
+        <div class="center-align" style="font-weight: normal; margin-bottom: 8px;">
+            संदर्भ :- श्री. {{ memo.executant_name }} यांचा विनंती अर्ज
+        </div>
+
+        <div class="left-align" style="font-weight: bold; margin-bottom: 8px;">
+            मा. {{ office.designation_01 }} {{ office.office_name }} यांचेकडे सविनय सादर
+        </div>
+
+        <!-- MAIN BODY (JUSTIFIED) -->
+        <div class="main-body justify-text">
+            <p class="paragraph">
+                श्री. {{ memo.executant_name }} यांनी अर्जान्वये विषयाकिंत दस्तऐवजात मुद्रांक शुल्क, नोंदणी फी व शास्ती शासन जमा करुन तसे ई-चलन या कार्यालया सादर केलेले आहे. अर्जदार यांनी {{ memo.office_name.name }} या कार्यालयी सन {{ memo.inspection_year }} मधील दि. {{ form.registration_date.value }} चा दस्तऐवज क्रं. {{ memo.deed_number }} मधील कमी पडलेला मुद्रांक शुल्क रुपये {{ display_stamp_duty_short }} व कमी पडलेली नोंदणी फी रुपये {{ display_reg_fee_short }} व शास्ती रुपये {{ display_penalty_amount }} यापैकी श्री. {{ memo.executant_name }} यांनी ग्रास प्रणालीमध्ये खालील प्रमाणे शासन जमा केलेली आहे.
+            </p>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>दस्त क्र</th>
+                        <th>तपशिल</th>
+                        <th>रक्कम (₹)</th>
+                        <th>जमा दिनांक</th>
+                        <th>चलन क्र</th>
+                        <th>चलन दिनांक</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td rowspan="3">{{ memo.deed_number }}</td>
+                        <td>मुद्रांक शुल्क</td>
+                        <td>{{ memo.recovered_stamp_duty|floatformat:2 }}</td>
+                        <td>{{ memo.recovered_stamp_duty_date|date:"d.m.Y"|default:"-" }}</td>
+                        <td>{{ memo.recovered_stamp_duty_challan|default:"-" }}</td>
+                        <td>{{ memo.recovered_stamp_duty_date|date:"d.m.Y"|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td>नोंदणी फी</td>
+                        <td>{{ memo.recovered_reg_fee|floatformat:2 }}</td>
+                        <td>{{ memo.recovered_reg_fee_date|date:"d.m.Y"|default:"-" }}</td>
+                        <td>{{ memo.recovered_reg_fee_challan|default:"-" }}</td>
+                        <td>{{ memo.recovered_reg_fee_date|date:"d.m.Y"|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td>शास्ती</td>
+                        <td>{{ memo.recovered_penalty|floatformat:2 }}</td>
+                        <td>{{ memo.recovered_penalty_date|date:"d.m.Y"|default:"-" }}</td>
+                        <td>{{ memo.recovered_penalty_challan|default:"-" }}</td>
+                        <td>{{ memo.recovered_penalty_date|date:"d.m.Y"|default:"-" }}</td>
+                    </tr>
+                    <tr style="font-weight: bold; background: #f9f9f9;">
+                        <td colspan="2">एकूण जमा</td>
+                        <td>{{ memo.recovered_amount|floatformat:2 }}</td>
+                        <td colspan="3"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p style="text-align: left; margin: 8px 0; font-weight: bold;">
+                अक्षरी एकूण रुपये {{ memo.recovered_amount|floatformat:2 }} अक्षरी <strong>{{ amount_in_words }}</strong>
+            </p>
+
+            <p class="paragraph">
+                उपरोक्त प्रमाणे श्री. {{ memo.executant_name }} यांनी उपरोक्त प्रमाणे रक्कम शासन जमा केली आहे तथापी मुद्रांक शुल्क रुपये ₹ {{ memo.balance_stamp_duty|floatformat:2 }} व नोंदणी फी रुपये ₹ {{ display_reg_fee_short }} व शास्ती रुपये ₹ {{ memo.balance_penalty|floatformat:2 }} अशी शासन जमा केलेली नाही.
+            </p>
+
+            <p class="paragraph">
+                उपरोक्त आषयाच्या अनुषगांने प्रस्तावित करण्यात येते की, विषयाकिंत परिच्छेद ({{ form.paragraph_number.value }}) दस्त क्रं. {{ memo.deed_number }} ( निष्पादन दि. {{ form.registration_date.value }} ) मधील तथापी मुद्रांक शुल्क रुपये ₹ {{ memo.balance_stamp_duty|floatformat:2 }} व नोंदणी फी रुपये ₹ {{ display_reg_fee_short }} व शास्ती रुपये ₹ {{ memo.balance_penalty|floatformat:2 }} अशी शासन वसुल करणे बाबत {{ memo.office_name.name }} यांना कळविण्यात यावे असे वाटते.
+            </p>
+        </div>
+
+        <!-- SIGNATURE SECTION -->
+        <div class="signature-footer">
+            <p style="text-align: center; font-weight: bold; margin-bottom: 5px;">
+                मान्य असल्यास सोबत जोडण्यात आलेल्या प्रारुप पत्रावर स्वाक्षरी होणेस विनंती आहे.<br>
+                कृपया आदेशार्थ
+            </p>
+
+            <div class="quad-sig">
+                <div class="quad-col">कनिष्ठ लिपीक</div>
+                <div class="quad-col">वरिष्ठ लिपीक</div>
+                <div class="quad-col">मुल्याकंन दुय्यम निबंधक</div>
+                <div class="quad-col">प्रशासकिय अधिकारी</div>
+            </div>
+
+            <div class="final-sig">
+                <div class="sig-name">({{ office.working_officer_name|default:"" }})</div>
+                <div>{{ office.designation_02|default:"" }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PREVIEW OVERLAY -->
+    <div id="previewOverlay">
+        <button id="closePreview" onclick="hidePreview()">बंद करा (Close)</button>
+        <button id="printFromPreview" onclick="window.print()">प्रिंट करा (Print)</button>
+        <div class="preview-content">
+            <div id="previewBody"></div>
+        </div>
+    </div>
+
+    <script>
+        function showPreview() {
+            const content = document.getElementById('reportContent').innerHTML;
+            document.getElementById('previewBody').innerHTML = content;
+            document.getElementById('previewOverlay').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+        function hidePreview() {
+            document.getElementById('previewOverlay').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    </script>
+</body>
+
+</html>

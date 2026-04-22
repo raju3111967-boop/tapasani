@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}तपासणी नोंदी - तपासणी मेमो{% endblock %}
+
+{% block extra_css %}
+<style>
+.inspection-table,
+.inspection-form {
+    font-size: 15px;
+}
+.inspection-table td.type-column { 
+    font-size: 16px; 
+    font-weight: 500; 
+}
+.inspection-table td, 
+.inspection-table th, 
+.inspection-table tr, 
+.inspection-table span { 
+    background-color: transparent !important; 
+}
+.hide-on-page { 
+    display: none; 
+}
+.print-header {
+    text-align: center;
+    margin-bottom: 20px;
+    display: none;
+}
+.print-title {
+    text-align: center;
+    font-weight: bold;
+    margin: 15px 0;
+    font-size: 16px;
+    display: none;
+}
+@media print {
+    .print-header {
+        display: block !important;
+        text-align: center;
+    }
+    .print-title {
+        display: block !important;
+    }
+    .no-print {
+        display: none !important;
+    }
+    .hide-on-page {
+        display: block !important;
+    }
+    @page {
+        size: legal landscape;
+        margin: 10mm;
+    }
+    body {
+        width: 100%;
+        transform: rotate(0deg);
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header no-print">
+    <h2><i class="bi bi-journal-text"></i> तपासणी नोंदी</h2>
+    <div class="d-flex gap-2">
+        <a href="{% url 'inspection_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> नवीन नोंद
+        </a>
+        <button onclick="window.print()" class="btn btn-primary">
+            <i class="bi bi-printer"></i> Print
+        </button>
+        <button onclick="window.print()" class="btn btn-primary">
+            <i class="bi bi-eye"></i> Print Preview
+        </button>
+        <a href="{% url 'inspection_export_excel' %}?{% for key, value in request.GET.items %}{{ key }}={{ value }}&{% endfor %}" class="btn btn-success">
+            <i class="bi bi-file-earmark-excel"></i> Export to Excel
+        </a>
+    </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="filter-bar no-print">
+    <form method="get" class="row g-2 align-items-end inspection-form">
+        <div class="col-md-2">
+            <label class="form-label">तपासणी प्रकार</label>
+            <select name="type" class="form-select">
+                <option value="">सर्व प्रकार</option>
+                {% for code, label in inspection_types %}
+                <option value="{{ code }}" {% if selected_type == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">तपासणी वर्ष</label>
+            <select name="year" class="form-select">
+                <option value="">सर्व वर्षे</option>
+                {% for yr in years %}
+                <option value="{{ yr.id }}" {% if selected_year == yr.id|stringformat:"d" %}selected{% endif %}>{{ yr.year }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">कार्यालय</label>
+            <select name="office" class="form-select">
+                <option value="">सर्व कार्यालये</option>
+                {% for off in offices %}
+                <option value="{{ off.id }}" {% if selected_office == off.id|stringformat:"d" %}selected{% endif %}>{{ off.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">शोधा</label>
+            <input type="text" name="search" class="form-control" placeholder="दस्त क्र., नाव, गाव..."
+                   value="{{ search }}" id="searchInput">
+        </div>
+        <div class="col-md-auto">
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="bi bi-search"></i> शोधा
+            </button>
+            <a href="{% url 'inspection_list' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-x-circle"></i> रीसेट
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Results Count -->
+<div class="mb-3 d-flex justify-content-between align-items-center no-print">
+    <small class="text-muted">
+        <i class="bi bi-list-ul me-1"></i> एकूण {{ memos.count }} नोंदी
+    </small>
+</div>
+
+<!-- Search Title -->
+<div class="print-title">
+    विषय :- तपासणी प्रकार
+    {% if selected_type %} - {{ selected_type_label }}{% endif %}
+    {% if selected_year %} - वर्ष {{ selected_year }}{% endif %}
+    {% if selected_office %} - {{ selected_office_name }}{% endif %}
+    {% if search %} - शोध: {{ search }}{% endif %}
+</div>
+
+<!-- Table -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-container">
+            <table class="table mb-0 inspection-table">
+                <thead>
+                    <tr>
+                        <th>अं.नं.</th>
+                        <th>प्रकार</th>
+                        <th>दस्त क्र.</th>
+                        <th>निष्पादन दिनांक</th>
+                        <th>कार्यालय</th>
+                        <th>मंजुरी स्थिती</th>
+                        <th class="text-end">कमी मु.शु</th>
+                        <th class="text-end">कमी फी</th>
+                        <th class="text-end">एकुण रक्कम</th>
+                        <th class="text-end">शिल्लक</th>
+                        <th>शेरा</th>
+                        <th class="text-center no-print">कृती</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for memo in memos %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td class="type-column">
+                            {{ memo.get_inspection_type_display }}
+                        </td>
+                        <td><strong>{{ memo.deed_number }}</strong></td>
+                        <td>{{ memo.execution_date|date:"d/m/Y" }}</td>
+                        <td>{{ memo.office_name }}</td>
+                        <td>{{ memo.approval_status|default:"-" }}</td>
+                        <td class="text-end">₹{{ memo.stamp_duty_short|floatformat:2|intcomma }}</td>
+                        <td class="text-end">₹{{ memo.reg_fee_short|floatformat:2|intcomma }}</td>
+                        <td class="text-end fw-bold">₹{{ memo.total_amount|floatformat:2|intcomma }}</td>
+                        <td class="text-end">
+                            {% if memo.balance_amount > 0 %}
+                            ₹{{ memo.balance_amount|floatformat:2|intcomma }}
+                            {% else %}
+                            वसूल
+                            {% endif %}
+                        </td>
+                        <td>{{ memo.remark|default:"-" }}</td>
+                        <td class="text-center no-print">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'inspection_detail' memo.pk %}" class="btn btn-outline-primary" title="पहा">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'inspection_edit' memo.pk %}" class="btn btn-outline-warning" title="संपादन">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'inspection_delete' memo.pk %}" class="btn btn-outline-danger" title="हटवा">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="12" class="text-center py-4 text-muted">
+                            <i class="bi bi-inbox" style="font-size:32px;"></i><br>
+                            कोणत्याही नोंदी आढळल्या नाहीत.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <!-- Footer Totals -->
+                    <tfoot>
+                        <tr style="font-weight: bold;">
+                            <td colspan="6" class="text-end">एकूण:</td>
+                            <td class="text-end">₹{{ total_stamp_duty|floatformat:2|intcomma }}</td>
+                            <td class="text-end">₹{{ total_reg_fee|floatformat:2|intcomma }}</td>
+                            <td class="text-end">₹{{ total_amount|floatformat:2|intcomma }}</td>
+                            <td class="text-end">₹{{ total_balance|floatformat:2|intcomma }}</td>
+                            <td class="no-print"></td>
+                            <td class="no-print"></td>
+                        </tr>
+                    </tfoot>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

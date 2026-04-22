@@ -1,0 +1,449 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - तपासणी मेमो{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <h2><i class="bi bi-journal-plus"></i> {{ title }}</h2>
+    <a href="{% url 'inspection_list' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left"></i> मागे जा
+    </a>
+</div>
+
+<form method="post" id="inspectionForm">
+    {% csrf_token %}
+
+    <!-- Non-field Errors -->
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        {% for error in form.non_field_errors %}
+        {{ error }}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Section 1: Inspection Type Selection -->
+    <div class="form-section">
+        <div class="form-section-header">
+            <i class="bi bi-tag"></i> तपासणी प्रकार निवडा
+        </div>
+        <div class="form-section-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <label class="form-label">तपासणी प्रकार *</label>
+                    {{ form.inspection_type }}
+                    {% if form.inspection_type.errors %}
+                    <div class="text-danger small">{{ form.inspection_type.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">मेमो क्रमांक</label>
+                    {{ form.memo_number }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">मेमो दिनांक</label>
+                    {{ form.memo_date }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2: Office & Period -->
+    <div class="form-section">
+        <div class="form-section-header">
+            <i class="bi bi-building"></i> कार्यालय व कालावधी
+        </div>
+        <div class="form-section-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">कार्यालयाचे नाव *</label>
+                    {{ form.office_name }}
+                    {% if form.office_name.errors %}
+                    <div class="text-danger small">{{ form.office_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">तपासणी वर्ष *</label>
+                    {{ form.inspection_year }}
+                    {% if form.inspection_year.errors %}
+                    <div class="text-danger small">{{ form.inspection_year.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label">तालुका</label>
+                    {{ form.taluka }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: Document Details -->
+    <div class="form-section">
+        <div class="form-section-header">
+            <i class="bi bi-file-earmark-text"></i> दस्तऐवज माहिती
+        </div>
+        <div class="form-section-body">
+            <div class="row g-3">
+                <div class="col-md-2">
+                    <label class="form-label">दस्त क्रमांक *</label>
+                    {{ form.deed_number }}
+                    {% if form.deed_number.errors %}
+                    <div class="text-danger small">{{ form.deed_number.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">परिच्छेद क्र</label>
+                    {{ form.paragraph_number }}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">निष्पादन दिनांक *</label>
+                    {{ form.execution_date }}
+                    {% if form.execution_date.errors %}
+                    <div class="text-danger small">{{ form.execution_date.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">नोंदणी दिनांक</label>
+                    {{ form.registration_date }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">दस्तऐवज प्रकार</label>
+                    {{ form.document_type }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">मालमत्ता प्रकार</label>
+                    {{ form.property_type }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">सक्षम प्राधिकारी</label>
+                    {{ form.competent_authority }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">न्यायप्रविष्ट स्थिती</label>
+                    {{ form.litigation_status }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">मंजुरी स्थिती</label>
+                    {{ form.approval_status }}
+                </div>
+            </div>
+
+            <!-- Conditional Litigation Fields -->
+            <div class="row g-3 mt-2" id="litigation-fields" style="display:none;">
+                <div class="col-md-6">
+                    <label class="form-label">न्यायालयाचे नाव</label>
+                    {{ form.court_name }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">पिटीशन क्रमांक</label>
+                    {{ form.petition_number }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 4: Property Details -->
+    <div class="form-section">
+        <div class="form-section-header">
+            <i class="bi bi-geo-alt"></i> मालमत्ता माहिती
+        </div>
+        <div class="form-section-body">
+            <div class="row g-3">
+                <div class="col-md-2">
+                    <label class="form-label">गट/सर्व्हे</label>
+                    {{ form.group_survey }}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">गट/सं.नं.क्रमांक</label>
+                    {{ form.survey_number }}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">एकुण क्षेत्रफळ</label>
+                    {{ form.area }}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">विक्री केलेले क्षेत्र</label>
+                    {{ form.sold_area }}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">बांधीव क्षेत्र</label>
+                    {{ form.built_up_area }}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">एकक</label>
+                    {{ form.unit }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">गाव/मौजे</label>
+                    {{ form.village }}
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">मिळकतीचे थोडक्यात वर्णन</label>
+                    {{ form.property_income_description }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">निष्पादकाचे नाव</label>
+                    {{ form.executant_name }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">निष्पादकाचा संपुर्ण पत्ता</label>
+                    {{ form.executant_address }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">निष्पादकाचा मोबाईल नंबर</label>
+                    {{ form.executant_mobile }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 5: Value Details -->
+    <div class="form-section">
+        <div class="form-section-header">
+            <i class="bi bi-currency-rupee"></i> मूल्य माहिती
+        </div>
+        <div class="form-section-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">आक्षेपीत मुल्याकंन</label>
+                    {{ form.market_value }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">दस्तातील मोबदला</label>
+                    {{ form.consideration_amount }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">मुल्याकंनातील फरक (Auto)</label>
+                    {{ form.valuation_difference }}
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">आक्षेपाचे थोडक्यात वर्णन</label>
+                    {{ form.objection_description }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 6: Stamp Duty & Fees (Auto Calculation) -->
+    <div class="form-section">
+        <div class="form-section-header">
+            <i class="bi bi-calculator"></i> मुद्रांक शुल्क व नोंदणी फी (स्वयंगणना)
+        </div>
+        <div class="form-section-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">आवश्यक मु.शु (₹)</label>
+                    {{ form.stamp_duty_actual }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">आवश्यक नों. फी (₹)</label>
+                    {{ form.reg_fee_actual }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">वसूल केलेला मु.शु (₹)</label>
+                    {{ form.stamp_duty_collected }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">वसूल केलेली नों. फी (₹)</label>
+                    {{ form.reg_fee_collected }}
+                </div>
+            </div>
+
+            <!-- Penalty Settings -->
+            <div class="row g-3 mt-2">
+                <div class="col-md-6">
+                    <label class="form-label">शास्तीचा दिनांक</label>
+                    {{ form.penalty_date }}
+                    <small class="text-muted" style="font-size:11px;">(शास्ती मोजण्यासाठी निष्पादन दिनांकापासून)</small>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">शास्तीचा दर (%)</label>
+                    {{ form.penalty_rate }}
+                    <small class="text-muted" style="font-size:11px;">(उदा: 0.02 = 2%)</small>
+                </div>
+            </div>
+
+            <!-- Auto Calculated Display -->
+            <hr class="my-3">
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <h6 class="text-primary fw-bold mb-3">
+                        <i class="bi bi-lightning-charge"></i> स्वयंगणना परिणाम
+                    </h6>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-2 rounded" style="background:#f0fff4; border:1px solid #c6f6d5;">
+                        <small class="text-muted d-block">कमी मु.शु</small>
+                        <span id="display_stamp_duty_short" class="calc-result fw-bold text-dark">₹ 0.00</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-2 rounded" style="background:#f0fff4; border:1px solid #c6f6d5;">
+                        <small class="text-muted d-block">कमी नों. फी</small>
+                        <span id="display_reg_fee_short" class="calc-result fw-bold text-dark">₹ 0.00</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-2 rounded" style="background:#fffff0; border:1px solid #fefcbf;">
+                        <small class="text-muted d-block">एकुण कमी</small>
+                        <span id="display_total_short" class="calc-result fw-bold text-dark">₹ 0.00</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-2 rounded" style="background:#ebf8ff; border:1px solid #bee3f8;">
+                        <small class="text-muted d-block">एकुण महिने</small>
+                        <span id="display_total_months" class="calc-result fw-bold text-dark">0 महिने</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-2 rounded" style="background:#fff5f5; border:1px solid #fed7d7;">
+                        <small class="text-muted d-block">शास्ती (2% × महिने)</small>
+                        <span id="display_penalty_amount" class="calc-result fw-bold text-danger">₹ 0.00</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-2 rounded" style="background:#f0fff4; border:1px solid #c6f6d5;">
+                        <small class="text-muted d-block">एकुण रक्कम</small>
+                        <span id="display_total_amount" class="calc-result fw-bold text-dark">₹ 0.00</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 rounded" style="background:#1a3a5c; border:1px solid #2c5282;">
+                        <small class="text-white d-block" style="opacity:0.8;">शिल्लक रक्कम</small>
+                        <span id="display_balance_amount" class="calc-result fw-bold" style="color:#ffffff; font-size:18px;">₹ 0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 7: Recovery & Status -->
+    <div class="form-section">
+        <div class="form-section-header">
+            <i class="bi bi-check-circle"></i> वसुली व स्थिती
+        </div>
+        <div class="form-section-body">
+            <!-- Individual Recovery Fields -->
+            <div class="row g-3 mb-3">
+                <div class="col-md-12">
+                    <h6 class="text-primary fw-bold mb-2">
+                        <i class="bi bi-cash-coin"></i> वसुली तपशील
+                    </h6>
+                </div>
+                
+                <!-- Stamp Duty Recovery -->
+                <div class="col-md-3">
+                    <label class="form-label">वसुल मु.शु (₹)</label>
+                    {{ form.recovered_stamp_duty }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">वसुली मु.शु.चा दिनांक</label>
+                    {{ form.recovered_stamp_duty_date }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">वसुल मु.शु. चलन डिफेस क्रं.</label>
+                    {{ form.recovered_stamp_duty_challan }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">शिल्लक मु.शु (₹)</label>
+                    <input type="text" class="form-control" id="id_balance_stamp_duty" readonly>
+                </div>
+
+                <!-- Registration Fee Recovery -->
+                <div class="col-md-3">
+                    <label class="form-label">वसुल नों.फी (₹)</label>
+                    {{ form.recovered_reg_fee }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">वसुली नों.फी चा दिनांक</label>
+                    {{ form.recovered_reg_fee_date }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">वसुल नों.फी चलन डिफेस क्रं.</label>
+                    {{ form.recovered_reg_fee_challan }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">शिल्लक नों.फी (₹)</label>
+                    <input type="text" class="form-control" id="id_balance_reg_fee" readonly>
+                </div>
+
+                <!-- Penalty Recovery -->
+                <div class="col-md-3">
+                    <label class="form-label">वसुल शास्ती (₹)</label>
+                    {{ form.recovered_penalty }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">वसुली शास्ती चा दिनांक</label>
+                    {{ form.recovered_penalty_date }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">वसुल शास्ती चलन डिफेस क्रं.</label>
+                    {{ form.recovered_penalty_challan }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">शिल्लक शास्ती (₹)</label>
+                    <input type="text" class="form-control" id="id_balance_penalty" readonly>
+                </div>
+
+                <!-- Recovery Letter Button -->
+                <div class="col-md-12 mt-3">
+                    <a href="{% if memo %}{% url 'inspection_detail' memo.pk %}{% else %}#{% endif %}" 
+                       id="id_btn_recovery_letter" 
+                       class="btn btn-info btn-sm {% if not memo %}disabled{% endif %}"
+                       target="_blank">
+                        <i class="bi bi-file-earmark-text me-1"></i> वसुलीचे पत्र
+                    </a>
+                    <small class="text-muted ms-2" style="font-size:11px;">(वसुली रक्कम प्रविष्ट केल्यानंतरच सक्रिय होते)</small>
+                </div>
+            </div>
+
+            <hr class="my-3">
+
+            <!-- Status Fields -->
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">शेरा</label>
+                    {{ form.remark }}
+                </div>
+                <div class="col-md-8">
+                    <label class="form-label">अतिरिक्त शेरा</label>
+                    {{ form.additional_remark }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="d-flex gap-2 justify-content-end mb-4">
+        <button type="reset" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-counterclockwise"></i> रीसेट
+        </button>
+        <a href="{% url 'inspection_list' %}" class="btn btn-outline-primary">
+            <i class="bi bi-x-circle"></i> रद्द करा
+        </a>
+        <button type="submit" class="btn btn-primary px-4">
+            <i class="bi bi-check-circle"></i> {% if is_edit %}अपडेट{% else %}जतन{% endif %} करा
+        </button>
+    </div>
+
+    <!-- Error Highlighting Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            {% comment %} Highlight invalid fields {% endcomment %}
+
+            {% for field in form %}
+                {% if field.errors %}
+                    const fieldEl = document.getElementById('id_{{ field.name }}');
+                    if (fieldEl) {
+                        fieldEl.classList.add('is-invalid');
+                    }
+                {% endif %}
+            {% endfor %}
+
+        });
+    </script>
+</form>
+{% endblock %}

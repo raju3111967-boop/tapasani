@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - मास्टर डेटा{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="bi {{ icon }}"></i> {{ title }}</h2>
+    <div class="d-flex gap-2">
+        <a href="{% url 'master_create' slug %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle"></i> नवीन जोडा
+        </a>
+        <a href="{% url 'master_dashboard' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> मागे
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-container">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th style="width:60px;">अं.नं.</th>
+                        <th>नाव / मजकूर</th>
+                        <th class="text-center" style="width:100px;">स्थिती</th>
+                        <th class="text-center" style="width:150px;">कृती</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr {% if not item.is_active %}style="opacity:0.5;"{% endif %}>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            {% if field_name == 'year' %}
+                                <strong>{{ item.year }}</strong>
+                            {% else %}
+                                <strong>{{ item.name }}</strong>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if item.is_active %}
+                                <span class="badge bg-success" style="font-size:11px;">सक्रिय</span>
+                            {% else %}
+                                <span class="badge bg-secondary" style="font-size:11px;">निष्क्रिय</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'master_edit' slug item.pk %}" class="btn btn-outline-warning" title="संपादन">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'master_toggle' slug item.pk %}" class="btn btn-outline-secondary" title="स्थिती बदला">
+                                    <i class="bi bi-toggle-{% if item.is_active %}on{% else %}off{% endif %}"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">
+                            <i class="bi bi-inbox" style="font-size:32px;"></i><br>
+                            कोणत्याही नोंदी नाहीत. पहिली नोंद जोडा.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

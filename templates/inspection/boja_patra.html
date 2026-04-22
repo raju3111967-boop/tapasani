@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="mr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>बोजाचे पत्र (आदेश) - {{ memo.deed_number }}</title>
+    <style>
+        @page {
+            size: legal;
+            margin: 10mm 15mm 10mm 20mm;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans Devanagari', 'Mangal', Arial, sans-serif;
+            font-size: 13pt;
+            line-height: 1.30;
+            color: #000;
+            background: #fff;
+            max-width: 215.9mm;
+            margin: 0 auto;
+            padding: 5px 15px;
+        }
+
+        .report-header {
+            margin-bottom: 0px;
+        }
+
+        .office-name {
+            text-align: center;
+            font-size: 16pt;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .office-address {
+            text-align: center;
+            font-size: 14pt;
+            margin-bottom: 4px;
+        }
+
+        .header-contact {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14pt;
+            margin-bottom: 2px;
+        }
+
+        .bold-line {
+            border: 0;
+            border-top: 3px solid #000;
+            margin: 0 0 5px 0;
+        }
+
+        .section-ref {
+            text-align: left;
+            margin-bottom: 5px;
+        }
+
+        .divider-line {
+            display: none;
+        }
+
+        .outward-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .report-title {
+            text-align: left;
+            font-size: 16pt;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .subject-line {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .content-body {
+            text-align: justify;
+        }
+
+        p {
+            margin-bottom: 5px;
+            text-align: justify;
+        }
+
+        .p-indent {
+            text-indent: 40px;
+        }
+
+        .signature-section {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+            text-align: center;
+            page-break-inside: avoid;
+        }
+
+        .sig-box {
+            min-width: 250px;
+        }
+
+        .print-buttons {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 999;
+        }
+
+        .btn-print,
+        .btn-preview {
+            background: #0d6efd;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        #previewOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        #previewBox {
+            background: #fff;
+            max-width: 850px;
+            margin: 20px auto;
+            padding: 40px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        #closePreview {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        @media print {
+            .print-buttons {
+                display: none !important;
+            }
+
+            #previewOverlay {
+                display: none !important;
+            }
+
+            body {
+                padding: 0;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="print-buttons">
+        <button class="btn-preview" onclick="showPreview()">Print Preview</button>
+        <button class="btn-print" onclick="window.print()">Print</button>
+    </div>
+
+    <!-- Header -->
+    <div class="report-header">
+        <div class="office-name">{{ office.office_name }}</div>
+        <div class="office-address">{{ office.office_address }}</div>
+        <div class="header-contact">
+            <span>फोन नंबर : {{ office.office_phone }}</span>
+            <span>ई-मेल : {{ office.office_email }}</span>
+        </div>
+        <hr class="bold-line">
+    </div>
+
+    <!-- संदर्भ Section -->
+    <div class="section-ref">
+        <div class="divider-line">
+            --------------------------------------------------------------------------------------------------------------------------------------------------
+        </div>
+        <p>संदर्भ :-</p>
+        <p>1. {{ form.office_name }} यांचेकडील पत्र क्र {{ memo.memo_number }}</p>
+        <p>2. या कार्यालयाची दिनांक {{ second_notice_date|date:"d/m/Y"|default:"(दुस-या नोटीसीचा इश्यु दिनांक)" }} ची
+            वसुलीची नोटीस</p>
+        <p>3. या कार्यालयाची दिनांक {{ hearing_notice_date|date:"d/m/Y"|default:"(सुनावणी नोटीसीचा इश्यु दिनांक)" }} ची
+            वसुलीची नोटीस</p>
+        <hr class="bold-line">
+    </div>
+
+    <div class="content-body">
+        <div class="outward-line">
+            <span>क्र कक्ष-तपासणी/{{ memo.get_inspection_type_display }}/दस्त.क्र.{{ memo.deed_number }}{% if memo.paragraph_number %} / परिच्छेद क्र.{{ memo.paragraph_number }}{% endif %} /</span>
+            <span>दिनांक {{ today|date:"d/m/Y" }}</span>
+        </div>
+
+        <div class="subject-line">
+            विषय :-मुद्रांक शुल्क वसुलीचा बोजा {{ memo.village }} तालुका {{ memo.taluka.name }} जिल्हा {{ office.district }} मिळकत नंबर {{ memo.survey_number }} 7/12 उता-यावर करणे बाबत
+        </div>
+
+        <h2 class="report-title">आदेश</h2>
+
+        <p class="p-indent">
+            ज्या अर्थी {{ memo.executant_name }} यांनी दिनांक {{ memo.execution_date|date:"d/m/Y" }} रोजी {{ form.office_name }} या कार्यालयात दस्तऐवज क्रमांक {{ memo.deed_number }} , {{ memo.executant_name }} यांनी लिहुन घेतलेला {{ memo.property_type.name }} या लेखाशिर्षाकाचे दस्ताऐवजासाठी कमी मुद्रांक शुल्क
+            रुपये {{ memo.stamp_duty_short|floatformat:2 }} व मुद्रांक शुल्कावर दंड रुपये (कमी दिलेल्या मुद्रांक
+            शुल्कावर दस्त निष्पादन दिनांक {{ memo.execution_date|date:"d/m/Y" }} ते प्रत्यक्ष वसुल होण्याच्या
+            दिनाकांपर्यत महिना किंवा महिन्याचे भागास 2% परंतु जास्तीत जास्त कमी मुद्रांक शुल्काच्या चौप्पट अशी शास्ती
+            देय आहे.)
+        </p>
+
+        <p class="p-indent">
+            त्याअर्थी मी मुद्रांक जिल्हाधिकारी {{ office.district }} महाराष्ट्रा मुद्रांक अधिनियमाचे कलम 46 अन्वये
+            जमिन महसुल थकबाकी करीता महाराष्ट्र जमिन महसुल संहिता 1966 अन्वये करावयाच्या कार्यवाहीबाबत जिल्हाधिकारी
+            म्हणून उक्त अधिनियमाचे कलम 2(एफ) व शासन अधिसूचना दिनांक 01/01/2003 क्र.मुद्रांक
+            2002/3981/C.R/843/(2)/एम-1/प्राप्त अधिकारान्वये कामकाज चालवून वसुल करण्याचे आदेश देत आहे.
+        </p>
+
+        <p class="p-indent">
+            सदरचे आदेश शासनाचे थकीत महसुल सत्वर वसुल व्हावा या हेतुन पारीत करण्यात आले आहे.दस्तऐवजाचा तपशिल व मिळकतीची
+            माहीती तसेच वसुल करावयाची रककम कोषागारांत जमा करण्याचे लेखाशिर्षाकाच्या माहीतीचे महसुली प्रमाणपत्र सोबत
+            जोडले आहे.
+        </p>
+
+        <div class="signature-section">
+            <div class="sig-box">
+                <div style="height: 60px;"></div> <!-- Signature Space -->
+                <div style="font-weight: bold;">({{ office.working_officer_name }})</div>
+                <div>{{ office.designation_02 }}</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 10px;">
+            <p>प्रति,</p>
+            <p>{{ memo.competent_authority.name }} यांना माहीतीसाठी व पुढील कार्यवाहीसाठी</p>
+            <p>प्रत</p>
+            <p>1. मा.जिल्हाधिकारी {{ office.district }} यांना माहीतीसाठी व उचीत कार्यवाहीसाठी सविनय सादर</p>
+            <p>2 {{ office.divisional_office_name }} यांना माहीतीसाठी सविनय सादर</p>
+            <p>3 कामगार तलाठी {{ memo.village }} तालुका {{ memo.taluka.name }} जिल्हा {{ office.district }} यांना
+                माहीतीसाठी व उचीत कार्यवाहीसाठी सविनय सादर</p>
+            <p>4 {{ form.office_name }} यांना माहीतीसाठी व उचीत कार्यवाहीसाठी सविनय सादर</p>
+            <p style="margin-left: 15px;">2/-सदर रक्कमेचा बोजा 7/12 उता-यावर नोंद घेणे कामी संबंधीत कार्यालयात पाठपुरावा
+                करुन मुद्रांक शुल्क बोजाचा 7/12 उता-यावर नोंद झाल्यावर त्याची एक प्रत आपल्या अहवालसह या कार्यालयास सादर
+                करावी.</p>
+            <p>6 {{ memo.executant_name }}, रा. {{ memo.executant_address }} यांना माहीतीसाठी अगेषित</p>
+        </div>
+    </div>
+
+    <div id="previewOverlay">
+        <div id="previewBox">
+            <button id="closePreview" onclick="hidePreview()">Close Preview</button>
+            <div id="previewContent"></div>
+        </div>
+    </div>
+
+    <script>
+        function showPreview() {
+            const previewArea = document.getElementById('previewContent');
+            const contentToPreview = document.querySelector('body').cloneNode(true);
+            const btns = contentToPreview.querySelector('.print-buttons');
+            if (btns) btns.remove();
+            const overlay = contentToPreview.querySelector('#previewOverlay');
+            if (overlay) overlay.remove();
+
+            previewArea.innerHTML = contentToPreview.innerHTML;
+            document.getElementById('previewOverlay').style.display = 'block';
+        }
+        function hidePreview() {
+            document.getElementById('previewOverlay').style.display = 'none';
+        }
+    </script>
+
+</body>
+
+</html>

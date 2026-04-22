@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}अहवाल - तपासणी मेमो{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="bi bi-bar-chart-line"></i> अहवाल केंद्र</h2>
+</div>
+
+<!-- Filter Info -->
+<div class="alert alert-info py-2 mb-4">
+    <i class="bi bi-info-circle me-1"></i>
+    प्रत्येक अहवालात <strong>तपासणी प्रकार</strong>, <strong>वर्ष</strong> व <strong>कार्यालय</strong> फिल्टर उपलब्ध आहे.
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <h6 class="text-muted fw-bold mb-2 text-uppercase" style="font-size:11px; letter-spacing:1px;">
+            <i class="bi bi-clock me-1"></i> प्रलंबित अहवाल
+        </h6>
+        <div class="d-flex flex-column gap-2">
+            <a href="{% url 'report_pending' %}" class="report-card">
+                <div class="report-icon" style="background:linear-gradient(135deg,#c53030,#e53e3e);">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <div>
+                    <div class="report-title">प्रलंबित प्रकरणे - सर्व प्रकार</div>
+                    <div class="report-desc">सर्व तपासणी प्रकारांचे प्रलंबित अहवाल</div>
+                </div>
+            </a>
+            <a href="{% url 'report_office_pending' %}" class="report-card">
+                <div class="report-icon" style="background:linear-gradient(135deg,#d69e2e,#ecc94b);">
+                    <i class="bi bi-building"></i>
+                </div>
+                <div>
+                    <div class="report-title">कार्यालयनिहाय प्रलंबित</div>
+                    <div class="report-desc">कार्यालयानुसार प्रलंबित प्रकरणे</div>
+                </div>
+            </a>
+            <a href="{% url 'report_office_month_pending' %}" class="report-card">
+                <div class="report-icon" style="background:linear-gradient(135deg,#b7791f,#d69e2e);">
+                    <i class="bi bi-calendar-month"></i>
+                </div>
+                <div>
+                    <div class="report-title">कार्यालय + मासिक प्रलंबित</div>
+                    <div class="report-desc">कार्यालय व महिनानिहाय प्रलंबित</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <h6 class="text-muted fw-bold mb-2 text-uppercase" style="font-size:11px; letter-spacing:1px;">
+            <i class="bi bi-check2-circle me-1"></i> वसुली अहवाल
+        </h6>
+        <div class="d-flex flex-column gap-2">
+            <a href="{% url 'report_recovered' %}" class="report-card">
+                <div class="report-icon" style="background:linear-gradient(135deg,#276749,#38a169);">
+                    <i class="bi bi-check2-all"></i>
+                </div>
+                <div>
+                    <div class="report-title">वसुली प्रकरणे - सर्व प्रकार</div>
+                    <div class="report-desc">वसुली झालेल्या प्रकरणांचा अहवाल</div>
+                </div>
+            </a>
+            <a href="{% url 'report_monthly' %}" class="report-card">
+                <div class="report-icon" style="background:linear-gradient(135deg,#2b6cb0,#4299e1);">
+                    <i class="bi bi-calendar3"></i>
+                </div>
+                <div>
+                    <div class="report-title">मासिक वसुली अहवाल</div>
+                    <div class="report-desc">महिनानिहाय वसुलीचा आढावा</div>
+                </div>
+            </a>
+            <a href="{% url 'report_yearly' %}" class="report-card">
+                <div class="report-icon" style="background:linear-gradient(135deg,#553c9a,#805ad5);">
+                    <i class="bi bi-calendar-year"></i>
+                </div>
+                <div>
+                    <div class="report-title">वार्षिक वसुली अहवाल</div>
+                    <div class="report-desc">वर्षनिहाय वसुलीचा आढावा</div>
+                </div>
+            </a>
+            <a href="{% url 'report_office_recovered' %}" class="report-card">
+                <div class="report-icon" style="background:linear-gradient(135deg,#285e61,#319795);">
+                    <i class="bi bi-building-check"></i>
+                </div>
+                <div>
+                    <div class="report-title">कार्यालयनिहाय वसुली</div>
+                    <div class="report-desc">कार्यालयानुसार वसुलीचा आढावा</div>
+                </div>
+            </a>
+            <a href="{% url 'report_office_year_recovery' %}" class="report-card">
+                <div class="report-icon" style="background:linear-gradient(135deg,#702459,#d53f8c);">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <div>
+                    <div class="report-title">कार्यालय + वार्षिक वसुली</div>
+                    <div class="report-desc">कार्यालय व वर्षनिहाय वसुली</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

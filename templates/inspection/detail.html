@@ -1,0 +1,453 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}दस्त क्र. {{ memo.deed_number }} - तपासणी मेमो{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="bi bi-journal-check"></i> तपासणी मेमो तपशील</h2>
+    <div class="d-flex gap-2">
+        <a href="{% url 'inspection_edit' memo.pk %}" class="btn btn-warning btn-sm">
+            <i class="bi bi-pencil"></i> संपादन
+        </a>
+        <a href="{% url 'inspection_list' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> मागे
+        </a>
+        <button onclick="window.print()" class="btn btn-outline-primary btn-sm no-print">
+            <i class="bi bi-printer"></i> प्रिंट
+        </button>
+
+        <!-- Notices Section -->
+        <div class="d-flex gap-2 no-print">
+            <div class="dropdown">
+                <button class="btn btn-success btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-file-earmark-text"></i> नोटीस
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a class="dropdown-item" href="{% url 'track_notice' memo.pk 'FIRST' %}" target="_blank">
+                            <i class="bi bi-file-earmark-text me-2"></i>प्रथम नोटीस
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{% url 'track_notice' memo.pk 'SECOND' %}" target="_blank">
+                            <i class="bi bi-file-earmark-text me-2"></i>दुसरी नोटीस
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{% url 'track_notice' memo.pk 'HEARING' %}" target="_blank">
+                            <i class="bi bi-file-earmark-text me-2"></i>सुनावणी नोटीस
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{% url 'final_order' memo.pk %}" target="_blank">
+                            <i class="bi bi-file-earmark-text me-2"></i>अंतिम आदेश
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{% url 'rrc_certificate' memo.pk %}" target="_blank">
+                            <i class="bi bi-file-earmark-text me-2"></i>आर.आर.सी बोजा
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{% url 'boja_patra' memo.pk %}" target="_blank">
+                            <i class="bi bi-file-earmark-text me-2"></i>बोजाचे पत्र
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="dropdown">
+                <button class="btn btn-info btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-envelope"></i> पत्र
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a class="dropdown-item" href="{% url 'track_letter' memo.pk 'full_payment_note' %}" target="_blank">
+                            <i class="bi bi-file-earmark-text me-2"></i>पुर्ण रक्कम टिप्पणी
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{% url 'track_letter' memo.pk 'full_payment' %}" target="_blank">
+                            <i class="bi bi-envelope me-2"></i>पुर्ण रक्कम पत्र
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{% url 'track_letter' memo.pk 'partial_payment_note' %}" target="_blank">
+                            <i class="bi bi-file-earmark-text me-2"></i>कमी रक्कम टिप्पणी
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{% url 'track_letter' memo.pk 'partial_payment' %}" target="_blank">
+                            <i class="bi bi-envelope me-2"></i>कमी रक्कम पत्र
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Type Badge -->
+<div class="mb-3">
+    <span class="badge bg-primary px-3 py-2" style="font-size:13px;">
+        <i class="bi bi-tag me-1"></i> {{ memo.get_inspection_type_display }}
+    </span>
+    {% if memo.is_pending %}
+    <span class="badge-pending ms-2">प्रलंबित</span>
+    {% else %}
+    <span class="badge-recovered ms-2">वसूल</span>
+    {% endif %}
+</div>
+
+<div class="row g-3">
+    <!-- Basic Info -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header"><i class="bi bi-info-circle"></i> मूलभूत माहिती</div>
+            <div class="card-body">
+                <table class="table table-sm table-borderless mb-0">
+                    <tr><td class="text-muted" style="width:40%;">अनुक्रमांक</td><td>{{ memo.sr_no|default:"-" }}</td></tr>
+                    <tr><td class="text-muted">दस्त क्रमांक</td><td><strong>{{ memo.deed_number }}</strong></td></tr>
+                    <tr><td class="text-muted">परिच्छेद क्र</td><td>{{ memo.paragraph_number|default:"-" }}</td></tr>
+                    <tr><td class="text-muted">कार्यालय</td><td>{{ memo.office_name }}</td></tr>
+                    <tr><td class="text-muted">तपासणी वर्ष</td><td>{{ memo.inspection_year }}</td></tr>
+                    <tr><td class="text-muted">तालुका</td><td>{{ memo.taluka|default:"-" }}</td></tr>
+                    <tr><td class="text-muted">दस्तऐवज प्रकार</td><td>{{ memo.document_type|default:"-" }}</td></tr>
+                    <tr><td class="text-muted">मालमत्ता प्रकार</td><td>{{ memo.property_type|default:"-" }}</td></tr>
+                    <tr><td class="text-muted">मेमो क्रमांक</td><td>{{ memo.memo_number|default:"-" }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dates & Parties -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header"><i class="bi bi-calendar-event"></i> दिनांक व पक्षकार</div>
+            <div class="card-body">
+                <table class="table table-sm table-borderless mb-0">
+                    <tr><td class="text-muted" style="width:40%;">निष्पादन दिनांक</td><td>{{ memo.execution_date|date:"d/m/Y" }}</td></tr>
+                    <tr><td class="text-muted">नोंदणी दिनांक</td><td>{{ memo.registration_date|date:"d/m/Y"|default:"-" }}</td></tr>
+                    <tr><td class="text-muted">तपासणी दिनांक</td><td>{{ memo.inspection_date|date:"d/m/Y"|default:"-" }}</td></tr>
+                    <tr><td class="text-muted">मेमो दिनांक</td><td>{{ memo.memo_date|date:"d/m/Y"|default:"-" }}</td></tr>
+                    <tr><td class="text-muted">निष्पादक</td><td>{{ memo.executant_name|default:"-" }}</td></tr>
+                    <tr><td class="text-muted">दावेदार</td><td>{{ memo.claimant_name|default:"-" }}</td></tr>
+                    <tr><td class="text-muted">गाव/मौजे</td><td>{{ memo.village|default:"-" }}</td></tr>
+                    <tr><td class="text-muted">गट/सर्व्हे</td><td>{{ memo.group_survey|default:"-" }}</td></tr>
+                    <tr><td class="text-muted">गट/सं.नं.क्रमांक</td><td>{{ memo.survey_number|default:"-" }}</td></tr>
+                    <tr><td class="text-muted">मिळकतीचे थोडक्यात वर्णन</td><td>{{ memo.property_income_description|default:"-" }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Details -->
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-currency-rupee"></i> आर्थिक तपशील</div>
+            <div class="card-body p-0">
+                <div class="table-container">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>बाजार मूल्य</th>
+                                <th>मोबदला</th>
+                                <th>आवश्यक मु.शु</th>
+                                <th>वसूल मु.शु</th>
+                                <th>कमी मु.शु</th>
+                                <th>आवश्यक फी</th>
+                                <th>वसूल फी</th>
+                                <th>कमी फी</th>
+                                <th>एकुण कमी रक्कम</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>₹{{ memo.market_value|floatformat:2|intcomma }}</td>
+                                <td>₹{{ memo.consideration_amount|floatformat:2|intcomma }}</td>
+                                <td>₹{{ memo.stamp_duty_actual|floatformat:2|intcomma }}</td>
+                                <td>₹{{ memo.stamp_duty_collected|floatformat:2|intcomma }}</td>
+                                <td class="fw-bold text-danger">₹{{ memo.stamp_duty_short|floatformat:2|intcomma }}</td>
+                                <td>₹{{ memo.reg_fee_actual|floatformat:2|intcomma }}</td>
+                                <td>₹{{ memo.reg_fee_collected|floatformat:2|intcomma }}</td>
+                                <td class="fw-bold text-danger">₹{{ memo.reg_fee_short|floatformat:2|intcomma }}</td>
+                                <td class="fw-bold" style="background:#e6fffa;">₹{{ memo.total_short|floatformat:2|intcomma }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer">
+                <table class="table table-sm table-borderless mb-0">
+                    <tr><td class="text-muted" style="width:30%;">आक्षेपाचे थोडक्यात वर्णन</td><td>{{ memo.objection_description|default:"-" }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calculation Results -->
+    <div class="col-md-12">
+        <div class="card" style="border:2px solid var(--primary);">
+            <div class="card-header" style="background:var(--primary); color:#fff;">
+                <i class="bi bi-calculator"></i> गणना परिणाम
+            </div>
+            <div class="card-body">
+                <div class="row g-3 text-center">
+                    <div class="col-md-3">
+                        <div class="p-3 rounded" style="background:#fffff0;">
+                            <small class="text-muted d-block">एकूण कमी</small>
+                            <strong class="fs-5">₹{{ memo.total_short|floatformat:2|intcomma }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 rounded" style="background:#f0f9ff;">
+                            <small class="text-muted d-block">निष्पादन दिनांक</small>
+                            <strong class="fs-5">{{ memo.execution_date|date:"d/m/Y" }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 rounded" style="background:#f0f9ff;">
+                            <small class="text-muted d-block">शास्तीचा दिनांक</small>
+                            <strong class="fs-5">{{ memo.penalty_date|date:"d/m/Y"|default:"-" }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 rounded" style="background:#ebf8ff;">
+                            <small class="text-muted d-block">एकूण महिने</small>
+                            <strong class="fs-5">{{ memo.total_months }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 rounded" style="background:#fff5f5;">
+                            <small class="text-muted d-block">शास्ती</small>
+                            <strong class="fs-5 text-danger">₹{{ memo.penalty_amount|floatformat:2|intcomma }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 rounded" style="background:#f0fff4;">
+                            <small class="text-muted d-block">एकूण रक्कम</small>
+                            <strong class="fs-5">₹{{ memo.total_amount|floatformat:2|intcomma }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 rounded" style="background:#f0fff4;">
+                            <small class="text-muted d-block">वसूल रक्कम</small>
+                            <strong class="fs-5 text-success">₹{{ memo.recovered_amount|floatformat:2|intcomma }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 rounded" style="background:{% if memo.balance_amount > 0 %}#fff5f5{% else %}#f0fff4{% endif %};">
+                            <small class="text-muted d-block">शिल्लक</small>
+                            <strong class="fs-5 {% if memo.balance_amount > 0 %}text-danger{% else %}text-success{% endif %}">
+                                ₹{{ memo.balance_amount|floatformat:2|intcomma }}
+                            </strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notice Tracking Table -->
+    <div class="col-md-12 mt-3">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-clock-history"></i> नोटीस ट्रॅकिंग
+            </div>
+            <div class="card-body p-0">
+                {% if memo.notices.exists %}
+                <div class="table-container">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>नोटीस प्रकार</th>
+                                <th>इश्यु दिनांक</th>
+                                <th>स्थिती</th>
+                                <th>दिनांक</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for notice in memo.notices.all %}
+                            <tr>
+                                <td>
+                                    {% if notice.notice_type %}
+                                        {{ notice.get_notice_type_display }}
+                                    {% elif notice.letter_type %}
+                                        {{ notice.get_letter_type_display }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ notice.issue_date|date:"d/m/Y"|default:"-" }}</td>
+                                <td>
+                                    <span class="badge
+                                        {% if notice.status == 'GENERATED' %}bg-warning
+                                        {% elif notice.status == 'SENT' %}bg-success
+                                        {% else %}bg-secondary{% endif %}">
+                                        {{ notice.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>{{ notice.sent_date|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        {% if notice.notice_type %}
+                                            <a href="{% url 'generate_notice' memo.pk notice.notice_type.lower %}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-eye"></i> View
+                                            </a>
+                                        {% elif notice.letter_type %}
+                                            <a href="{% url 'generate_letter' memo.pk notice.letter_type.lower %}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-eye"></i> View
+                                            </a>
+                                        {% endif %}
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#editNoticeModal{{ notice.pk }}">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <form action="{% url 'delete_notice' notice.pk %}" method="post" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('तुम्हाला खात्री आहे की हे नोटीस हटवायचे आहे?');">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                    कोणतेही नोटीस तयार केलेले नाहीत
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recovery Details -->
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-cash-coin"></i> वसुल रक्कमेचा तपशील</div>
+            <div class="card-body p-0">
+                <div class="table-container">
+                    <table class="table table-bordered table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>प्रकार</th>
+                                <th>वसुलीचा दिनांक</th>
+                                <th>चलन डिफेस क्रं.</th>
+                                <th>वसुल रक्कम</th>
+                                <th>शिल्लक</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>मुद्रांक शुल्य</strong></td>
+                                <td>{{ memo.recovered_stamp_duty_date|date:"d/m/Y"|default:"-" }}</td>
+                                <td>{{ memo.recovered_stamp_duty_challan|default:"-" }}</td>
+                                <td>₹{{ memo.recovered_stamp_duty|floatformat:2|intcomma|default:"-" }}</td>
+                                <td class="fw-bold {% if memo.balance_stamp_duty > 0 %}text-danger{% else %}text-success{% endif %}">₹{{ memo.balance_stamp_duty|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>नोंदणी फी</strong></td>
+                                <td>{{ memo.recovered_reg_fee_date|date:"d/m/Y"|default:"-" }}</td>
+                                <td>{{ memo.recovered_reg_fee_challan|default:"-" }}</td>
+                                <td>₹{{ memo.recovered_reg_fee|floatformat:2|intcomma|default:"-" }}</td>
+                                <td class="fw-bold {% if memo.balance_reg_fee > 0 %}text-danger{% else %}text-success{% endif %}">₹{{ memo.balance_reg_fee|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>शास्ती</strong></td>
+                                <td>{{ memo.recovered_penalty_date|date:"d/m/Y"|default:"-" }}</td>
+                                <td>{{ memo.recovered_penalty_challan|default:"-" }}</td>
+                                <td>₹{{ memo.recovered_penalty|floatformat:2|intcomma|default:"-" }}</td>
+                                <td class="fw-bold {% if memo.balance_penalty > 0 %}text-danger{% else %}text-success{% endif %}">₹{{ memo.balance_penalty|floatformat:2|intcomma }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status -->
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-flag"></i> स्थिती व शेरा</div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <small class="text-muted d-block">मंजुरी स्थिती</small>
+                        <strong>{{ memo.approval_status|default:"-" }}</strong>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted d-block">सक्षम प्राधिकारी</small>
+                        <strong>{{ memo.competent_authority|default:"-" }}</strong>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted d-block">न्यायप्रविष्ट स्थिती</small>
+                        <strong>{{ memo.litigation_status|default:"-" }}</strong>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted d-block">शेरा</small>
+                        <strong>{{ memo.remark|default:"-" }}</strong>
+                    </div>
+                    {% if memo.additional_remark %}
+                    <div class="col-md-12">
+                        <small class="text-muted d-block">अतिरिक्त शेरा</small>
+                        <strong>{{ memo.additional_remark }}</strong>
+                    </div>
+                    {% endif %}
+                    {% if memo.challan_number %}
+                    <div class="col-md-4">
+                        <small class="text-muted d-block">चलन क्रमांक</small>
+                        <strong>{{ memo.challan_number }}</strong>
+                    </div>
+                    {% endif %}
+                    {% if memo.recovery_date %}
+                    <div class="col-md-4">
+                        <small class="text-muted d-block">वसुली दिनांक</small>
+                        <strong>{{ memo.recovery_date|date:"d/m/Y" }}</strong>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Notice Modals -->
+    {% for notice in memo.notices.all %}
+    <div class="modal fade" id="editNoticeModal{{ notice.pk }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">नोटीस संपादन</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="post" action="{% url 'edit_notice' notice.pk %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">इश्यु दिनांक</label>
+                            <input type="date" name="issue_date" class="form-control" value="{{ notice.issue_date|date:'Y-m-d' }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">स्थिती</label>
+                            <select name="status" class="form-select">
+                                <option value="GENERATED" {% if notice.status == 'GENERATED' %}selected{% endif %}>तयार झाले</option>
+                                <option value="SENT" {% if notice.status == 'SENT' %}selected{% endif %}>पाठविले</option>
+                                <option value="CLOSED" {% if notice.status == 'CLOSED' %}selected{% endif %}>बंद</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">रद्द करा</button>
+                        <button type="submit" class="btn btn-primary">जतन करा</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
